@@ -1,0 +1,66 @@
+{
+  "event": {
+    "name": "Guardant Health Beverage Order Form",
+    "active": true
+  },
+  "sections": {
+    "temperature": {
+      "enabled": true,
+      "required": true,
+      "options": ["Hot", "Iced"]
+    },
+    "caffeination": {
+      "enabled": true,
+      "required": true,
+      "options": ["Caffeinated", "Decaffeinated"]
+    },
+    "beverage": {
+      "enabled": true,
+      "required": true
+    },
+    "milk": {
+      "enabled": true,
+      "required": false
+    },
+    "flavors": {
+      "enabled": true,
+      "required": false
+    },
+    "toppings": {
+      "enabled": true,
+      "required": false
+    },
+    "specialInstructions": {
+      "enabled": true,
+      "required": false,
+      "maxLength": 500
+    },
+    "name": {
+      "enabled": true,
+      "required": false
+    },
+    "pickupTime": {
+      "enabled": true,
+      "required": false,
+      "startTime": "14:00",
+      "endTime": "17:00"
+    },
+    "location": {
+      "enabled": true,
+      "required": false,
+      "options": ["Main Office", "Conference Room A", "Break Room"]
+    },
+    "emailOptIn": {
+      "enabled": true,
+      "required": false
+    }
+  },
+  "brevo": {
+    "senderEmail": "guardant@goldfish.coffee",
+    "senderName": "Guardant Health Barista",
+    "replyToEmail": "orders@goldfishcoffee.com"
+  },
+  "googleSheets": {
+    "spreadsheetId": "1l0uPX5_tbN-28IH3vsJsnxQDI9q4FbVUZGk66r06XnY"
+  }
+}
