@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>🩸Guardant Health Beverage Orders☕</title>
+</head>
+<body>
+    <h1>🩸Guardant Health Beverage Orders☕</h1>
+    <form id="beverageOrderForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="pickUpTime">Pickup Time:</label>
+        <input type="datetime-local" id="pickUpTime" name="pickUpTime" required><br><br>
+
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" required><br><br>
+
+        <label for="temperature">Temperature:</label>
+        <select id="temperature" name="temperature">
+            <option value="hot">Hot</option>
+            <option value="cold">Cold</option>
+        </select><br><br>
+
+        <label for="caffeination">Caffeination:</label>
+        <select id="caffeination" name="caffeination">
+            <option value="caffeinated">Caffeinated</option>
+            <option value="decaf">Decaf</option>
+        </select><br><br>
+
+        <label for="beverage">Beverage Selection:</label>
+        <select id="beverage" name="beverage">
+            <!-- Options for beverages will be dynamically populated -->
+        </select><br><br>
+
+        <label for="milk">Milk:</label>
+        <input type="text" id="milk" name="milk"><br><br>
+
+        <label for="flavors">Flavors:</label>
+        <input type="text" id="flavors" name="flavors"><br><br>
+
+        <label for="toppings">Toppings:</label>
+        <input type="text" id="toppings" name="toppings"><br><br>
+
+        <label for="specialInstructions">Special Instructions:</label>
+        <textarea id="specialInstructions" name="specialInstructions"></textarea><br><br>
+
+        <label for="emailOptIn">Opt-in for confirmations:</label>
+        <input type="checkbox" id="emailOptIn" name="emailOptIn" value="guardant@goldfish.coffee"><br><br>
+
+        <input type="submit" value="Submit Order">
+    </form>
+    <script src="../js/script.js"></script>
+</body>
+</html>
