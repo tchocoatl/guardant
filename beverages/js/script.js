@@ -1,3 +1,20 @@
+// ===== CONFIGURATION SECTION =====
+// Customize these settings for different events
+
+const CONFIG = {
+    // Pick-up time constraints (24-hour format)
+    pickupTimeMin: '14:00',  // 2:00 PM
+    pickupTimeMax: '17:00',  // 5:00 PM
+    
+    // Show/hide location field
+    showLocationField: false,
+    
+    // Default locations (if location field is shown)
+    locations: ['Main Office', 'Conference Room A', 'Break Room']
+};
+
+// ===== END CONFIGURATION SECTION =====
+
 // Global state
 let formState = {
     temperature: null,
@@ -38,18 +55,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(`Items loaded: ${items.length} items total`);
     setupEventListeners();
     renderFlavorsOptions();
+    renderToppingsOptions();
     renderLocations();
+    applyConfiguration();
     showSection(0);
     console.log('Form initialized');
 });
 
+// Apply configuration settings
+function applyConfiguration() {
+    // Set time input constraints
+    document.getElementById('pickupTime').min = CONFIG.pickupTimeMin;
+    document.getElementById('pickupTime').max = CONFIG.pickupTimeMax;
+    
+    // Show/hide location field
+    const locationSection = document.getElementById('location').parentElement;
+    if (!CONFIG.showLocationField) {
+        locationSection.style.display = 'none';
+    }
+}
+
 // Load items from CSV
 async function loadItems() {
     try {
+        console.log('About to fetch Items.csv from path: ./Items.csv');
         const response = await fetch('./Items.csv');
+        console.log('Fetch response status:', response.status);
+        
+        if (!response.ok) {
+            console.error('Failed to fetch Items.csv. Status:', response.status);
+            return;
+        }
+        
         const csv = await response.text();
+        console.log('CSV loaded, length:', csv.length);
         items = parseCSV(csv);
-        console.log('CSV loaded and parsed');
+        console.log('CSV parsed, items count:', items.length);
     } catch (error) {
         console.error('Error loading items:', error);
     }
@@ -107,7 +148,6 @@ function showSection(index) {
 // Navigate to next section
 function nextSection() {
     console.log(`nextSection called from section ${currentSection}`);
-    console.log(`Validating section ${currentSection}...`);
     
     if (currentSection < sections.length - 1) {
         // Validate current section
@@ -124,27 +164,18 @@ function nextSection() {
         
         // Special handling for dynamic sections
         if (currentSection === 1) {
-            // After caffeination selection - populate beverage options
             console.log('Populating beverage options...');
             renderBeverageOptions();
         } else if (currentSection === 2) {
-            // After beverage selection - populate styles
             console.log('Populating style options...');
             updateStyles();
         } else if (currentSection === 3) {
-            // After style selection - populate items
             console.log('Populating item options...');
             updateItems();
         } else if (currentSection === 4) {
-            // After item selection - populate milk options
             console.log('Populating milk options...');
             updateMilkOptions();
-        } else if (currentSection === 7) {
-            // After toppings - update toppings based on temperature
-            console.log('Populating toppings options...');
-            renderToppingsOptions();
         } else if (currentSection === 8) {
-            // Before summary - render summary
             console.log('Rendering summary...');
             renderSummary();
         }
@@ -162,10 +193,9 @@ function previousSection() {
 
 // Validate current section
 function validateSection(section) {
-    const form = document.getElementById('beverageForm');
     const sectionElement = document.getElementById(sections[section]);
     
-    // For temperature and caffeination sections, just check if a radio is selected
+    // Step 1: Temperature
     if (section === 0) {
         const tempRadio = sectionElement.querySelector('input[name="temperature"]:checked');
         if (!tempRadio) {
@@ -174,6 +204,7 @@ function validateSection(section) {
         }
     }
     
+    // Step 2: Caffeination
     if (section === 1) {
         const caffRadio = sectionElement.querySelector('input[name="caffeination"]:checked');
         if (!caffRadio) {
@@ -182,6 +213,7 @@ function validateSection(section) {
         }
     }
     
+    // Step 3: Beverage Type
     if (section === 2) {
         const beverage = document.getElementById('beverageType').value;
         if (!beverage) {
@@ -190,6 +222,7 @@ function validateSection(section) {
         }
     }
     
+    // Step 4: Style
     if (section === 3) {
         const style = document.getElementById('style').value;
         if (!style) {
@@ -198,6 +231,7 @@ function validateSection(section) {
         }
     }
     
+    // Step 5: Item
     if (section === 4) {
         const item = document.getElementById('item').value;
         if (!item) {
@@ -206,6 +240,7 @@ function validateSection(section) {
         }
     }
     
+    // Step 6: Milk
     if (section === 5) {
         const milk = sectionElement.querySelector('input[name="milk"]:checked');
         if (!milk) {
@@ -214,14 +249,53 @@ function validateSection(section) {
         }
     }
     
+    // Step 7: Flavors (must select at least one non-"None" option, or "None" explicitly)
+    if (section === 6) {
+        const selectedFlavors = Array.from(sectionElement.querySelectorAll('input[name="flavors"]:checked')).map(cb => cb.value);
+        const noneSelected = selectedFlavors.includes('No Flavors or Add-ons');
+        const otherSelected = selectedFlavors.some(f => f !== 'No Flavors or Add-ons');
+        
+        if (selectedFlavors.length === 0 || (noneSelected && otherSelected)) {
+            alert('Please select flavors or choose "No Flavors or Add-ons"');
+            return false;
+        }
+    }
+    
+    // Step 8: Toppings (must select at least one non-"None" option, or "None" explicitly)
+    if (section === 7) {
+        const selectedToppings = Array.from(sectionElement.querySelectorAll('input[name="toppings"]:checked')).map(cb => cb.value);
+        const noneSelected = selectedToppings.includes('No Toppings');
+        const otherSelected = selectedToppings.some(f => f !== 'No Toppings');
+        
+        if (selectedToppings.length === 0 || (noneSelected && otherSelected)) {
+            alert('Please select toppings or choose "No Toppings"');
+            return false;
+        }
+    }
+    
+    // Step 9: Details
     if (section === 8) {
         const name = document.getElementById('name').value;
         const time = document.getElementById('pickupTime').value;
-        const location = document.getElementById('location').value;
         
-        if (!name || !time || !location) {
-            alert('Please fill in name, time, and location');
+        if (!name || !time) {
+            alert('Please fill in name and pick-up time');
             return false;
+        }
+        
+        // Validate time is within range
+        if (time < CONFIG.pickupTimeMin || time > CONFIG.pickupTimeMax) {
+            alert(`Pick-up time must be between ${CONFIG.pickupTimeMin} and ${CONFIG.pickupTimeMax}`);
+            return false;
+        }
+        
+        // Validate location if shown
+        if (CONFIG.showLocationField) {
+            const location = document.getElementById('location').value;
+            if (!location) {
+                alert('Please select a location');
+                return false;
+            }
         }
     }
     
@@ -275,9 +349,8 @@ function renderBeverageOptions() {
 
     const select = document.getElementById('beverageType');
     const html = '<option value="">Choose...</option>' + 
-        Array.from(beverages).map(bev => `<option value="${bev}">${bev}</option>`).join('');
+        Array.from(beverages).sort().map(bev => `<option value="${bev}">${bev}</option>`).join('');
     
-    console.log('Setting innerHTML for beverageType select');
     select.innerHTML = html;
 }
 
@@ -286,8 +359,6 @@ function updateStyles() {
     const beverage = document.getElementById('beverageType').value;
     const temperature = document.querySelector('input[name="temperature"]:checked')?.value;
     const caffeination = document.querySelector('input[name="caffeination"]:checked')?.value;
-    
-    console.log(`Filtering styles for Beverage: ${beverage}`);
     
     const styles = new Set(items
         .filter(item => {
@@ -301,7 +372,7 @@ function updateStyles() {
 
     const select = document.getElementById('style');
     select.innerHTML = '<option value="">Choose...</option>' + 
-        Array.from(styles).map(style => `<option value="${style}">${style}</option>`).join('');
+        Array.from(styles).sort().map(style => `<option value="${style}">${style}</option>`).join('');
 }
 
 // Update item options based on style
@@ -310,8 +381,6 @@ function updateItems() {
     const style = document.getElementById('style').value;
     const temperature = document.querySelector('input[name="temperature"]:checked')?.value;
     const caffeination = document.querySelector('input[name="caffeination"]:checked')?.value;
-    
-    console.log(`Filtering items for Style: ${style}`);
     
     const filteredItems = items.filter(item => {
         if (item.Category !== 'Beverage') return false;
@@ -394,10 +463,9 @@ function renderToppingsOptions() {
 
 // Render locations
 function renderLocations() {
-    const locations = ['Main Office', 'Conference Room A', 'Break Room'];
     const select = document.getElementById('location');
     select.innerHTML = '<option value="">Select...</option>' + 
-        locations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+        CONFIG.locations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
 }
 
 // Toggle email field
@@ -448,7 +516,7 @@ function renderSummary() {
         summary += `<div class="summary-item"><span class="summary-label">Pick-up Time:</span> ${formState.pickupTime}</div>`;
     }
 
-    if (formState.location) {
+    if (CONFIG.showLocationField && formState.location) {
         summary += `<div class="summary-item"><span class="summary-label">Location:</span> ${formState.location}</div>`;
     }
 
@@ -467,12 +535,12 @@ function submitForm(e) {
         style: formState.style,
         item: formState.item,
         milk: formState.milk || 'None',
-        flavors: formState.flavors,
-        toppings: formState.toppings,
+        flavors: formState.flavors.length > 0 ? formState.flavors : ['None'],
+        toppings: formState.toppings.length > 0 ? formState.toppings : ['None'],
         specialInstructions: formState.specialInstructions,
         name: formState.name,
         pickupTime: formState.pickupTime,
-        location: formState.location,
+        location: formState.location || 'N/A',
         email: formState.email,
         emailOptIn: formState.emailOptIn,
         timestamp: new Date().toISOString()
