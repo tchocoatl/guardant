@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Load items from CSV
 async function loadItems() {
     try {
-        const response = await fetch('Items.csv');
+        const response = await fetch('../Items.csv');
         const csv = await response.text();
         items = parseCSV(csv);
         console.log('CSV loaded and parsed');
