@@ -42,7 +42,7 @@
             box-shadow: 0 0 10px rgba(210, 105, 30, 0.5);
         }
         
-        input[type="text"], input[type="email"], input[type="time"], textarea { 
+        input[type="text"], input[type="email"], textarea { 
             width: 100%; 
             padding: 12px; 
             margin: 8px 0 15px 0; 
@@ -157,14 +157,19 @@
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
 
-            <!-- Step 9: Details -->
+            <!-- Step 9: Pick-up Time -->
+            <div class="form-step" id="timeSection">
+                <h2>Step 9: Pick-up Time</h2>
+                <div class="button-group" id="timeGroup"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
+
+            <!-- Step 10: Details -->
             <div class="form-step" id="detailsSection">
-                <h2>Step 9: Order Details</h2>
+                <h2>Step 10: Order Details</h2>
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" autocomplete="name" placeholder="Enter your name">
-                
-                <label for="pickupTime">Pick-up Time (2:00 PM - 5:00 PM):</label>
-                <input type="time" id="pickupTime" name="pickupTime" autocomplete="off" min="14:00" max="17:00">
                 
                 <label class="checkbox-label">
                     <input type="checkbox" id="emailOptIn" autocomplete="off" onchange="toggleEmailField()">
@@ -183,9 +188,9 @@
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
 
-            <!-- Step 10: Summary -->
+            <!-- Step 11: Summary -->
             <div class="form-step" id="summarySection">
-                <h2>Step 10: Order Summary</h2>
+                <h2>Step 11: Order Summary</h2>
                 <div id="orderSummary"></div>
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="submit">Submit Order</button>
@@ -193,9 +198,10 @@
 
             <div id="successMessage">
                 <h2>✅ Order Submitted!</h2>
-                <p>Your order has been placed successfully.</p>
+                <p>Your beverage order has been placed successfully.</p>
                 <p id="confirmationText"></p>
-                <button type="button" onclick="location.reload()">Place Another Order</button>
+                <p style="margin-top: 20px; color: #666;">Redirecting to Goldfish Coffee...</p>
+                <button type="button" onclick="window.location.href='https://goldfishcoffee.com'">Continue to Goldfish Coffee</button>
             </div>
         </form>
     </div>
