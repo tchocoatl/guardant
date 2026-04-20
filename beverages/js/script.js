@@ -104,7 +104,16 @@ function nextSection() {
     updateFormState();
     
     if (currentSection === 1) renderBeverageButtons();
-    if (currentSection === 2) renderStyleButtons();
+    if (currentSection === 2) {
+        // If Other Beverage selected, skip Style and go to Items
+        if (formState.beverage === 'Other Beverage') {
+            showSection(currentSection + 2); // Skip Style section
+            renderItemButtons();
+            return;
+        } else {
+            renderStyleButtons();
+        }
+    }
     if (currentSection === 3) renderItemButtons();
     if (currentSection === 4) renderMilkButtons();
     if (currentSection === 7) renderTimeButtons();
@@ -137,7 +146,8 @@ function validateSection(section) {
         }
     }
     if (section === 3) {
-        if (!formState.style) {
+        // Skip style validation if Other Beverage (it goes directly to items)
+        if (formState.beverage !== 'Other Beverage' && !formState.style) {
             alert('Please select a style');
             return false;
         }
@@ -167,8 +177,11 @@ function validateSection(section) {
         }
     }
     if (section === 8) {
-        if (!formState.pickupTime) {
-            alert('Please select a pick-up time');
+        const hour = document.getElementById('pickupHour').value;
+        const minute = document.getElementById('pickupMinute').value;
+        
+        if (!hour || minute === '') {
+            alert('Please select a pick-up time (hour and minutes)');
             return false;
         }
     }
@@ -276,15 +289,9 @@ function renderBeverageButtons() {
         beverageMap[displayName] = item.Type;
     });
     
+    // Fixed order: Coffee, Tea, Other
     const customOrder = ['Coffee', 'Tea', 'Other'];
-    const sortedKeys = Object.keys(beverageMap).sort((a, b) => {
-        const aIndex = customOrder.indexOf(a);
-        const bIndex = customOrder.indexOf(b);
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-        if (aIndex !== -1) return -1;
-        if (bIndex !== -1) return 1;
-        return a.localeCompare(b);
-    });
+    const sortedKeys = customOrder.filter(key => key in beverageMap);
     
     const html = sortedKeys
         .map(display => `<button type="button" class="option-button beverage-option" onclick="selectOption('beverage', '${beverageMap[display]}', this)">${display}</button>`)
@@ -327,7 +334,7 @@ function renderItemButtons() {
     const filteredItems = items.filter(item => {
         if (item.Category !== 'Beverage') return false;
         if (item.Type !== formState.beverage) return false;
-        if (item.Style !== formState.style) return false;
+        if (formState.beverage !== 'Other Beverage' && item.Style !== formState.style) return false;
         if (item.Temperature !== 'Both' && item.Temperature !== formState.temperature) return false;
         if (item.Caffeination !== 'Both' && item.Caffeination !== formState.caffeination) return false;
         return true;
@@ -382,25 +389,25 @@ function renderToppingsButtons() {
 }
 
 function renderTimeButtons() {
-    // Generate 15-minute increments from 2:00 PM to 5:00 PM
-    const times = [];
-    for (let hour = 14; hour < 17; hour++) {
-        for (let minutes = 0; minutes < 60; minutes += 15) {
-            const timeStr = `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-            const hourDisplay = hour === 14 ? '2' : hour === 15 ? '3' : hour === 16 ? '4' : '5';
-            const periodDisplay = hour < 12 ? 'AM' : 'PM';
-            const minDisplay = minutes === 0 ? '00' : minutes;
-            const label = `${hourDisplay}:${minDisplay} PM`;
-            times.push({ label, value: timeStr });
-        }
-    }
-    // Add 5:00 PM
-    times.push({ label: '5:00 PM', value: '17:00' });
+    // Hour and minute dropdowns are already in HTML, just add change listeners
+    const hourSelect = document.getElementById('pickupHour');
+    const minuteSelect = document.getElementById('pickupMinute');
     
-    const html = times
-        .map(time => `<button type="button" class="option-button time-option" onclick="selectOption('time', '${time.value}', this)">${time.label}</button>`)
-        .join('');
-    document.getElementById('timeGroup').innerHTML = html;
+    const updateTime = () => {
+        const hour = hourSelect.value;
+        const minute = minuteSelect.value;
+        
+        if (hour && minute !== '') {
+            formState.pickupTime = `${hour}:${minute}`;
+        } else {
+            formState.pickupTime = null;
+        }
+    };
+    
+    if (hourSelect && minuteSelect) {
+        hourSelect.addEventListener('change', updateTime);
+        minuteSelect.addEventListener('change', updateTime);
+    }
 }
 
 function toggleEmailField() {
@@ -415,11 +422,21 @@ function toggleEmailField() {
 
 function timeValueToLabel(value) {
     const [hours, minutes] = value.split(':');
-    const hour = parseInt(hours);
-    const min = parseInt(minutes);
-    const hourDisplay = hour === 14 ? '2' : hour === 15 ? '3' : hour === 16 ? '4' : hour === 17 ? '5' : hour;
-    const minDisplay = String(min).padStart(2, '0');
-    return `${hourDisplay}:${minDisplay} PM`;
+    let hour = parseInt(hours);
+    const min = minutes;
+    
+    // Convert to 12-hour format
+    let period = 'AM';
+    if (hour >= 12) {
+        period = 'PM';
+        if (hour > 12) {
+            hour = hour - 12;
+        }
+    } else if (hour === 0) {
+        hour = 12;
+    }
+    
+    return hour + ':' + min + ' ' + period;
 }
 
 function renderSummary() {
@@ -427,14 +444,25 @@ function renderSummary() {
         <div class="summary-item"><span class="summary-label">Temperature:</span> ${formState.temperature}</div>
         <div class="summary-item"><span class="summary-label">Caffeination:</span> ${formState.caffeination}</div>
         <div class="summary-item"><span class="summary-label">Beverage:</span> ${formState.beverage}</div>
-        <div class="summary-item"><span class="summary-label">Style:</span> ${formState.style}</div>
-        <div class="summary-item"><span class="summary-label">Item:</span> ${formState.item}</div>
     `;
+    
+    if (formState.style) {
+        summary += `<div class="summary-item"><span class="summary-label">Style:</span> ${formState.style}</div>`;
+    }
+    
+    summary += `<div class="summary-item"><span class="summary-label">Item:</span> ${formState.item}</div>`;
     
     if (formState.milk) summary += `<div class="summary-item"><span class="summary-label">Milk:</span> ${formState.milk}</div>`;
     if (formState.flavors.length > 0) summary += `<div class="summary-item"><span class="summary-label">Flavors:</span> ${formState.flavors.join(', ')}</div>`;
     if (formState.toppings.length > 0) summary += `<div class="summary-item"><span class="summary-label">Toppings:</span> ${formState.toppings.join(', ')}</div>`;
-    if (formState.pickupTime) summary += `<div class="summary-item"><span class="summary-label">Pick-up Time:</span> ${timeValueToLabel(formState.pickupTime)}</div>`;
+    
+    const hour = document.getElementById('pickupHour').value;
+    const minute = document.getElementById('pickupMinute').value;
+    if (hour && minute !== '') {
+        const time = `${hour}:${minute}`;
+        summary += `<div class="summary-item"><span class="summary-label">Pick-up Time:</span> ${timeValueToLabel(time)}</div>`;
+    }
+    
     if (formState.name) summary += `<div class="summary-item"><span class="summary-label">Name:</span> ${formState.name}</div>`;
     if (formState.specialInstructions) summary += `<div class="summary-item"><span class="summary-label">Special Instructions:</span> ${formState.specialInstructions}</div>`;
     if (formState.emailOptIn && formState.email) summary += `<div class="summary-item"><span class="summary-label">Email:</span> ${formState.email}</div>`;
@@ -447,14 +475,19 @@ function submitForm(e) {
     
     // Prevent double submission
     if (submissionInProgress) {
-        alert('Order is being submitted. Please wait...');
         return;
     }
     submissionInProgress = true;
     
-    // Show success message immediately
+    // Show success message IMMEDIATELY
     document.getElementById('beverageForm').style.display = 'none';
     document.getElementById('successMessage').style.display = 'block';
+    document.getElementById('confirmationText').innerHTML = 'Submitting your order...';
+    
+    // Get pickup time from dropdowns for payload
+    const hour = document.getElementById('pickupHour').value;
+    const minute = document.getElementById('pickupMinute').value;
+    const pickupTimeValue = `${hour}:${minute}`;
     
     const payload = {
         temperature: formState.temperature,
@@ -465,7 +498,7 @@ function submitForm(e) {
         milk: formState.milk,
         flavors: formState.flavors,
         toppings: formState.toppings,
-        pickupTime: formState.pickupTime,
+        pickupTime: pickupTimeValue,
         specialInstructions: formState.specialInstructions,
         name: formState.name,
         email: formState.email,
@@ -479,8 +512,11 @@ function submitForm(e) {
     })
     .then(r => r.json())
     .then(result => {
+        // Update confirmation message with email status
         if (result.emailSent && formState.email) {
             document.getElementById('confirmationText').innerHTML = 'Confirmation email sent to ' + formState.email;
+        } else {
+            document.getElementById('confirmationText').innerHTML = '';
         }
         
         // Redirect after 3 seconds
