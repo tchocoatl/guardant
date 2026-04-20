@@ -163,12 +163,23 @@ function validateSection(section) {
         }
     }
     if (section === 8) {
-        if (!formState.name || !formState.pickupTime) {
-            alert('Please fill in name and pick-up time');
+        const name = document.getElementById('name').value.trim();
+        const pickupTime = document.getElementById('pickupTime').value.trim();
+        
+        console.log('Validating details - name:', name, 'pickupTime:', pickupTime);
+        
+        if (!name) {
+            alert('Please enter your name');
             return false;
         }
-        if (formState.pickupTime < CONFIG.pickupTimeMin || formState.pickupTime > CONFIG.pickupTimeMax) {
-            alert(`Time must be between ${CONFIG.pickupTimeMin} and ${CONFIG.pickupTimeMax}`);
+        if (!pickupTime) {
+            alert('Please select a pick-up time');
+            return false;
+        }
+        
+        // Validate time is within range
+        if (pickupTime < CONFIG.pickupTimeMin || pickupTime > CONFIG.pickupTimeMax) {
+            alert(`Pick-up time must be between ${CONFIG.pickupTimeMin.replace(/^(\d{2}):/, (_, h) => parseInt(h) % 12 || 12) + ':' + CONFIG.pickupTimeMin.slice(-2)} and ${CONFIG.pickupTimeMax.replace(/^(\d{2}):/, (_, h) => parseInt(h) % 12 || 12) + ':' + CONFIG.pickupTimeMax.slice(-2)}`);
             return false;
         }
     }
@@ -176,10 +187,10 @@ function validateSection(section) {
 }
 
 function updateFormState() {
-    formState.name = document.getElementById('name').value;
-    formState.pickupTime = document.getElementById('pickupTime').value;
+    formState.name = document.getElementById('name').value.trim();
+    formState.pickupTime = document.getElementById('pickupTime').value.trim();
     formState.specialInstructions = document.getElementById('specialInstructions').value;
-    formState.email = document.getElementById('email').value;
+    formState.email = document.getElementById('email').value.trim();
     formState.emailOptIn = document.getElementById('emailOptIn').checked;
 }
 
@@ -253,20 +264,24 @@ function renderCaffeinationButtons() {
 }
 
 function renderBeverageButtons() {
-    const beverages = new Set(
-        items
-            .filter(item => {
-                if (item.Category !== 'Beverage') return false;
-                if (item.Temperature !== 'Both' && item.Temperature !== formState.temperature) return false;
-                if (item.Caffeination !== 'Both' && item.Caffeination !== formState.caffeination) return false;
-                return true;
-            })
-            .map(item => item.Type)
-    );
+    const beverageItems = items.filter(item => {
+        if (item.Category !== 'Beverage') return false;
+        if (item.Temperature !== 'Both' && item.Temperature !== formState.temperature) return false;
+        if (item.Caffeination !== 'Both' && item.Caffeination !== formState.caffeination) return false;
+        return true;
+    });
     
-    const html = Array.from(beverages)
+    // Map Type to display names: Coffee, Tea, Other Beverage -> Other
+    const beverageMap = {};
+    beverageItems.forEach(item => {
+        let displayName = item.Type;
+        if (item.Type === 'Other Beverage') displayName = 'Other';
+        beverageMap[displayName] = item.Type;
+    });
+    
+    const html = Object.keys(beverageMap)
         .sort()
-        .map(bev => `<button type="button" class="option-button beverage-option" onclick="selectOption('beverage', '${bev}', this)">${bev}</button>`)
+        .map(display => `<button type="button" class="option-button beverage-option" onclick="selectOption('beverage', '${beverageMap[display]}', this)">${display}</button>`)
         .join('');
     document.getElementById('beverageGroup').innerHTML = html;
 }
@@ -374,6 +389,7 @@ function renderSummary() {
     if (formState.specialInstructions) summary += `<div class="summary-item"><span class="summary-label">Instructions:</span> ${formState.specialInstructions}</div>`;
     if (formState.name) summary += `<div class="summary-item"><span class="summary-label">Name:</span> ${formState.name}</div>`;
     if (formState.pickupTime) summary += `<div class="summary-item"><span class="summary-label">Pick-up Time:</span> ${formState.pickupTime}</div>`;
+    if (formState.emailOptIn && formState.email) summary += `<div class="summary-item"><span class="summary-label">Email:</span> ${formState.email}</div>`;
     
     document.getElementById('orderSummary').innerHTML = summary;
 }
