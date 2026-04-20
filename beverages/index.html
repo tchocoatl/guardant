@@ -42,7 +42,7 @@
             box-shadow: 0 0 10px rgba(210, 105, 30, 0.5);
         }
         
-        input[type="text"], input[type="email"], textarea { 
+        input[type="text"], input[type="email"], textarea, select { 
             width: 100%; 
             padding: 12px; 
             margin: 8px 0 15px 0; 
@@ -86,6 +86,10 @@
         .summary-label { font-weight: bold; color: #8B4513; }
         #successMessage { display: none; text-align: center; color: green; }
         small { display: block; margin-top: -10px; margin-bottom: 10px; color: #666; font-size: 0.9em; }
+        
+        .time-selects { display: flex; gap: 10px; margin: 20px 0; }
+        .time-select { flex: 1; }
+        .time-select label { margin: 0 0 5px 0; }
     </style>
 </head>
 <body>
@@ -160,7 +164,28 @@
             <!-- Step 9: Pick-up Time -->
             <div class="form-step" id="timeSection">
                 <h2>Step 9: Pick-up Time</h2>
-                <div class="button-group" id="timeGroup"></div>
+                <div class="time-selects">
+                    <div class="time-select">
+                        <label for="pickupHour">Hour:</label>
+                        <select id="pickupHour">
+                            <option value="">Select hour...</option>
+                            <option value="14">2:00 PM</option>
+                            <option value="15">3:00 PM</option>
+                            <option value="16">4:00 PM</option>
+                            <option value="17">5:00 PM</option>
+                        </select>
+                    </div>
+                    <div class="time-select">
+                        <label for="pickupMinute">Minutes:</label>
+                        <select id="pickupMinute">
+                            <option value="">Select minutes...</option>
+                            <option value="00">00</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="45">45</option>
+                        </select>
+                    </div>
+                </div>
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
@@ -201,7 +226,6 @@
                 <p>Your beverage order has been placed successfully.</p>
                 <p id="confirmationText"></p>
                 <p style="margin-top: 20px; color: #666;">Redirecting to Goldfish Coffee...</p>
-                <button type="button" onclick="window.location.href='https://goldfishcoffee.com'">Continue to Goldfish Coffee</button>
             </div>
         </form>
     </div>
