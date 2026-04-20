@@ -1,21 +1,12 @@
 // ===== CONFIGURATION SECTION =====
-// Customize these settings for different events
-
 const CONFIG = {
-    // Pick-up time constraints (24-hour format)
     pickupTimeMin: '14:00',  // 2:00 PM
     pickupTimeMax: '17:00',  // 5:00 PM
-    
-    // Show/hide location field
     showLocationField: false,
-    
-    // Default locations (if location field is shown)
     locations: ['Main Office', 'Conference Room A', 'Break Room']
 };
-
 // ===== END CONFIGURATION SECTION =====
 
-// Global state
 let formState = {
     temperature: null,
     caffeination: null,
@@ -48,55 +39,29 @@ const sections = [
     'summarySection'
 ];
 
-// Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Page loaded, starting initialization...');
+    console.log('Page loaded');
     await loadItems();
-    console.log(`Items loaded: ${items.length} items total`);
     setupEventListeners();
-    renderFlavorsOptions();
-    renderToppingsOptions();
-    renderLocations();
-    applyConfiguration();
+    renderTemperatureButtons();
+    renderCaffeinationButtons();
+    renderFlavorsButtons();
+    renderToppingsButtons();
     showSection(0);
-    console.log('Form initialized');
 });
 
-// Apply configuration settings
-function applyConfiguration() {
-    // Set time input constraints
-    document.getElementById('pickupTime').min = CONFIG.pickupTimeMin;
-    document.getElementById('pickupTime').max = CONFIG.pickupTimeMax;
-    
-    // Show/hide location field
-    const locationSection = document.getElementById('location').parentElement;
-    if (!CONFIG.showLocationField) {
-        locationSection.style.display = 'none';
-    }
-}
-
-// Load items from CSV
 async function loadItems() {
     try {
-        console.log('About to fetch Items.csv from path: ./Items.csv');
         const response = await fetch('./Items.csv');
-        console.log('Fetch response status:', response.status);
-        
-        if (!response.ok) {
-            console.error('Failed to fetch Items.csv. Status:', response.status);
-            return;
-        }
-        
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const csv = await response.text();
-        console.log('CSV loaded, length:', csv.length);
         items = parseCSV(csv);
-        console.log('CSV parsed, items count:', items.length);
+        console.log(`Loaded ${items.length} items`);
     } catch (error) {
-        console.error('Error loading items:', error);
+        console.error('Error loading CSV:', error);
     }
 }
 
-// Parse CSV
 function parseCSV(csv) {
     const lines = csv.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
@@ -106,21 +71,14 @@ function parseCSV(csv) {
         if (!lines[i].trim()) continue;
         const obj = {};
         const values = lines[i].split(',').map(v => v.trim());
-
         headers.forEach((header, idx) => {
             obj[header] = values[idx] || '';
         });
-
-        if (obj.Available === 'TRUE') {
-            data.push(obj);
-        }
+        if (obj.Available === 'TRUE') data.push(obj);
     }
-
-    console.log('Parsed items:', data.length);
     return data;
 }
 
-// Setup event listeners
 function setupEventListeners() {
     document.getElementById('beverageForm').addEventListener('submit', submitForm);
     document.getElementById('specialInstructions').addEventListener('input', (e) => {
@@ -128,419 +86,313 @@ function setupEventListeners() {
     });
 }
 
-// Show a specific section
 function showSection(index) {
     sections.forEach((section, idx) => {
         const element = document.getElementById(section);
-        if (idx === index) {
-            element.classList.add('active');
-            element.classList.remove('hidden');
-        } else {
-            element.classList.remove('active');
-            element.classList.add('hidden');
-        }
+        element.classList.toggle('active', idx === index);
     });
-    
     currentSection = index;
     updateProgress();
 }
 
-// Navigate to next section
 function nextSection() {
-    console.log(`nextSection called from section ${currentSection}`);
+    if (!validateSection(currentSection)) return;
     
-    if (currentSection < sections.length - 1) {
-        // Validate current section
-        if (!validateSection(currentSection)) {
-            console.log('Validation FAILED');
-            return;
-        }
-        
-        console.log('Validation PASSED');
-        
-        // Update state
-        updateFormState();
-        console.log('Form state updated:', formState);
-        
-        // Special handling for dynamic sections
-        if (currentSection === 1) {
-            console.log('Populating beverage options...');
-            renderBeverageOptions();
-        } else if (currentSection === 2) {
-            console.log('Populating style options...');
-            updateStyles();
-        } else if (currentSection === 3) {
-            console.log('Populating item options...');
-            updateItems();
-        } else if (currentSection === 4) {
-            console.log('Populating milk options...');
-            updateMilkOptions();
-        } else if (currentSection === 8) {
-            console.log('Rendering summary...');
-            renderSummary();
-        }
-        
-        showSection(currentSection + 1);
-    }
+    updateFormState();
+    
+    if (currentSection === 1) renderBeverageButtons();
+    if (currentSection === 2) renderStyleButtons();
+    if (currentSection === 3) renderItemButtons();
+    if (currentSection === 4) renderMilkButtons();
+    if (currentSection === 8) renderSummary();
+    
+    showSection(currentSection + 1);
 }
 
-// Navigate to previous section
 function previousSection() {
-    if (currentSection > 0) {
-        showSection(currentSection - 1);
-    }
+    if (currentSection > 0) showSection(currentSection - 1);
 }
 
-// Validate current section
 function validateSection(section) {
-    const sectionElement = document.getElementById(sections[section]);
-    
-    // Step 1: Temperature
     if (section === 0) {
-        const tempRadio = sectionElement.querySelector('input[name="temperature"]:checked');
-        if (!tempRadio) {
+        if (!formState.temperature) {
             alert('Please select a temperature');
             return false;
         }
     }
-    
-    // Step 2: Caffeination
     if (section === 1) {
-        const caffRadio = sectionElement.querySelector('input[name="caffeination"]:checked');
-        if (!caffRadio) {
-            alert('Please select a caffeination level');
+        if (!formState.caffeination) {
+            alert('Please select caffeination');
             return false;
         }
     }
-    
-    // Step 3: Beverage Type
     if (section === 2) {
-        const beverage = document.getElementById('beverageType').value;
-        if (!beverage) {
+        if (!formState.beverage) {
             alert('Please select a beverage type');
             return false;
         }
     }
-    
-    // Step 4: Style
     if (section === 3) {
-        const style = document.getElementById('style').value;
-        if (!style) {
+        if (!formState.style) {
             alert('Please select a style');
             return false;
         }
     }
-    
-    // Step 5: Item
     if (section === 4) {
-        const item = document.getElementById('item').value;
-        if (!item) {
+        if (!formState.item) {
             alert('Please select an item');
             return false;
         }
     }
-    
-    // Step 6: Milk
     if (section === 5) {
-        const milk = sectionElement.querySelector('input[name="milk"]:checked');
-        if (!milk) {
-            alert('Please select a milk option');
+        if (!formState.milk) {
+            alert('Please select milk');
             return false;
         }
     }
-    
-    // Step 7: Flavors (must select at least one non-"None" option, or "None" explicitly)
     if (section === 6) {
-        const selectedFlavors = Array.from(sectionElement.querySelectorAll('input[name="flavors"]:checked')).map(cb => cb.value);
-        const noneSelected = selectedFlavors.includes('No Flavors or Add-ons');
-        const otherSelected = selectedFlavors.some(f => f !== 'No Flavors or Add-ons');
-        
-        if (selectedFlavors.length === 0 || (noneSelected && otherSelected)) {
-            alert('Please select flavors or choose "No Flavors or Add-ons"');
+        if (formState.flavors.length === 0) {
+            alert('Please select flavors or "No Flavors"');
             return false;
         }
     }
-    
-    // Step 8: Toppings (must select at least one non-"None" option, or "None" explicitly)
     if (section === 7) {
-        const selectedToppings = Array.from(sectionElement.querySelectorAll('input[name="toppings"]:checked')).map(cb => cb.value);
-        const noneSelected = selectedToppings.includes('No Toppings');
-        const otherSelected = selectedToppings.some(f => f !== 'No Toppings');
-        
-        if (selectedToppings.length === 0 || (noneSelected && otherSelected)) {
-            alert('Please select toppings or choose "No Toppings"');
+        if (formState.toppings.length === 0) {
+            alert('Please select toppings or "No Toppings"');
             return false;
         }
     }
-    
-    // Step 9: Details
     if (section === 8) {
-        const name = document.getElementById('name').value;
-        const time = document.getElementById('pickupTime').value;
-        
-        if (!name || !time) {
+        if (!formState.name || !formState.pickupTime) {
             alert('Please fill in name and pick-up time');
             return false;
         }
-        
-        // Validate time is within range
-        if (time < CONFIG.pickupTimeMin || time > CONFIG.pickupTimeMax) {
-            alert(`Pick-up time must be between ${CONFIG.pickupTimeMin} and ${CONFIG.pickupTimeMax}`);
+        if (formState.pickupTime < CONFIG.pickupTimeMin || formState.pickupTime > CONFIG.pickupTimeMax) {
+            alert(`Time must be between ${CONFIG.pickupTimeMin} and ${CONFIG.pickupTimeMax}`);
             return false;
         }
-        
-        // Validate location if shown
-        if (CONFIG.showLocationField) {
-            const location = document.getElementById('location').value;
-            if (!location) {
-                alert('Please select a location');
-                return false;
-            }
-        }
     }
-    
     return true;
 }
 
-// Update form state from current inputs
 function updateFormState() {
-    const form = document.getElementById('beverageForm');
-    formState.temperature = form.querySelector('input[name="temperature"]:checked')?.value || null;
-    formState.caffeination = form.querySelector('input[name="caffeination"]:checked')?.value || null;
-    formState.beverage = form.querySelector('#beverageType')?.value || null;
-    formState.style = form.querySelector('#style')?.value || null;
-    formState.item = form.querySelector('#item')?.value || null;
-    formState.milk = form.querySelector('input[name="milk"]:checked')?.value || null;
-    formState.flavors = Array.from(form.querySelectorAll('input[name="flavors"]:checked')).map(cb => cb.value);
-    formState.toppings = Array.from(form.querySelectorAll('input[name="toppings"]:checked')).map(cb => cb.value);
-    formState.specialInstructions = form.querySelector('#specialInstructions')?.value || '';
-    formState.name = form.querySelector('#name')?.value || '';
-    formState.pickupTime = form.querySelector('#pickupTime')?.value || '';
-    formState.location = form.querySelector('#location')?.value || '';
-    formState.email = form.querySelector('#email')?.value || '';
-    formState.emailOptIn = form.querySelector('#emailOptIn')?.checked || false;
+    formState.name = document.getElementById('name').value;
+    formState.pickupTime = document.getElementById('pickupTime').value;
+    formState.specialInstructions = document.getElementById('specialInstructions').value;
+    formState.email = document.getElementById('email').value;
+    formState.emailOptIn = document.getElementById('emailOptIn').checked;
 }
 
-// Update progress bar
 function updateProgress() {
     const progress = ((currentSection + 1) / sections.length) * 100;
     document.getElementById('progressBar').style.width = progress + '%';
 }
 
-// Render beverage type options
-function renderBeverageOptions() {
-    const temperature = document.querySelector('input[name="temperature"]:checked')?.value;
-    const caffeination = document.querySelector('input[name="caffeination"]:checked')?.value;
+function selectOption(name, value, element) {
+    // Remove previous selection
+    document.querySelectorAll(`.${name}-option`).forEach(btn => btn.classList.remove('selected'));
     
-    console.log(`Filtering beverages for Temperature: ${temperature}, Caffeination: ${caffeination}`);
+    // Add selection to clicked element
+    element.classList.add('selected');
     
-    const matchingItems = items.filter(item => {
-        if (item.Category !== 'Beverage') return false;
-        if (item.Temperature !== 'Both' && item.Temperature !== temperature) return false;
-        if (item.Caffeination !== 'Both' && item.Caffeination !== caffeination) return false;
-        return true;
-    });
-    
-    console.log(`Matching beverages: ${matchingItems.length}`, matchingItems);
-    
-    const beverages = new Set(matchingItems.map(item => item.Type));
-    
-    console.log(`Unique beverage types: ${Array.from(beverages).join(', ')}`);
-
-    const select = document.getElementById('beverageType');
-    const html = '<option value="">Choose...</option>' + 
-        Array.from(beverages).sort().map(bev => `<option value="${bev}">${bev}</option>`).join('');
-    
-    select.innerHTML = html;
+    // Update state
+    if (name === 'temperature') formState.temperature = value;
+    if (name === 'caffeination') formState.caffeination = value;
+    if (name === 'beverage') formState.beverage = value;
+    if (name === 'style') formState.style = value;
+    if (name === 'item') formState.item = value;
+    if (name === 'milk') formState.milk = value;
 }
 
-// Update style options based on beverage
-function updateStyles() {
-    const beverage = document.getElementById('beverageType').value;
-    const temperature = document.querySelector('input[name="temperature"]:checked')?.value;
-    const caffeination = document.querySelector('input[name="caffeination"]:checked')?.value;
+function toggleOption(name, value, element) {
+    element.classList.toggle('selected');
     
-    const styles = new Set(items
-        .filter(item => {
-            if (item.Category !== 'Beverage') return false;
-            if (item.Type !== beverage) return false;
-            if (item.Temperature !== 'Both' && item.Temperature !== temperature) return false;
-            if (item.Caffeination !== 'Both' && item.Caffeination !== caffeination) return false;
-            return true;
-        })
-        .map(item => item.Style));
-
-    const select = document.getElementById('style');
-    select.innerHTML = '<option value="">Choose...</option>' + 
-        Array.from(styles).sort().map(style => `<option value="${style}">${style}</option>`).join('');
+    if (name === 'flavors') {
+        if (value === 'No Flavors or Add-ons') {
+            // Uncheck all others
+            document.querySelectorAll('.flavors-option').forEach(btn => {
+                if (btn.textContent.trim() !== 'No Flavors or Add-ons') btn.classList.remove('selected');
+            });
+            formState.flavors = ['No Flavors or Add-ons'];
+        } else {
+            // Remove "No Flavors" if selected
+            document.querySelectorAll('.flavors-option').forEach(btn => {
+                if (btn.textContent.includes('No Flavors')) btn.classList.remove('selected');
+            });
+            formState.flavors = Array.from(document.querySelectorAll('.flavors-option.selected')).map(btn => btn.textContent.trim());
+        }
+    }
+    
+    if (name === 'toppings') {
+        if (value === 'No Toppings') {
+            document.querySelectorAll('.toppings-option').forEach(btn => {
+                if (btn.textContent.trim() !== 'No Toppings') btn.classList.remove('selected');
+            });
+            formState.toppings = ['No Toppings'];
+        } else {
+            document.querySelectorAll('.toppings-option').forEach(btn => {
+                if (btn.textContent.includes('No Toppings')) btn.classList.remove('selected');
+            });
+            formState.toppings = Array.from(document.querySelectorAll('.toppings-option.selected')).map(btn => btn.textContent.trim());
+        }
+    }
 }
 
-// Update item options based on style
-function updateItems() {
-    const beverage = document.getElementById('beverageType').value;
-    const style = document.getElementById('style').value;
-    const temperature = document.querySelector('input[name="temperature"]:checked')?.value;
-    const caffeination = document.querySelector('input[name="caffeination"]:checked')?.value;
+function renderTemperatureButtons() {
+    const html = ['Hot', 'Iced']
+        .map(temp => `<button type="button" class="option-button temperature-option" onclick="selectOption('temperature', '${temp}', this)">${temp}</button>`)
+        .join('');
+    document.getElementById('temperatureGroup').innerHTML = html;
+}
+
+function renderCaffeinationButtons() {
+    const html = ['Caffeinated', 'Decaffeinated']
+        .map(caff => `<button type="button" class="option-button caffeination-option" onclick="selectOption('caffeination', '${caff}', this)">${caff}</button>`)
+        .join('');
+    document.getElementById('caffeinationGroup').innerHTML = html;
+}
+
+function renderBeverageButtons() {
+    const beverages = new Set(
+        items
+            .filter(item => {
+                if (item.Category !== 'Beverage') return false;
+                if (item.Temperature !== 'Both' && item.Temperature !== formState.temperature) return false;
+                if (item.Caffeination !== 'Both' && item.Caffeination !== formState.caffeination) return false;
+                return true;
+            })
+            .map(item => item.Type)
+    );
     
+    const html = Array.from(beverages)
+        .sort()
+        .map(bev => `<button type="button" class="option-button beverage-option" onclick="selectOption('beverage', '${bev}', this)">${bev}</button>`)
+        .join('');
+    document.getElementById('beverageGroup').innerHTML = html;
+}
+
+function renderStyleButtons() {
+    const styles = new Set(
+        items
+            .filter(item => {
+                if (item.Category !== 'Beverage') return false;
+                if (item.Type !== formState.beverage) return false;
+                if (item.Temperature !== 'Both' && item.Temperature !== formState.temperature) return false;
+                if (item.Caffeination !== 'Both' && item.Caffeination !== formState.caffeination) return false;
+                return true;
+            })
+            .map(item => item.Style)
+    );
+    
+    const html = Array.from(styles)
+        .sort()
+        .map(style => `<button type="button" class="option-button style-option" onclick="selectOption('style', '${style}', this)">${style}</button>`)
+        .join('');
+    document.getElementById('styleGroup').innerHTML = html;
+}
+
+function renderItemButtons() {
     const filteredItems = items.filter(item => {
         if (item.Category !== 'Beverage') return false;
-        if (item.Type !== beverage) return false;
-        if (item.Style !== style) return false;
-        if (item.Temperature !== 'Both' && item.Temperature !== temperature) return false;
-        if (item.Caffeination !== 'Both' && item.Caffeination !== caffeination) return false;
+        if (item.Type !== formState.beverage) return false;
+        if (item.Style !== formState.style) return false;
+        if (item.Temperature !== 'Both' && item.Temperature !== formState.temperature) return false;
+        if (item.Caffeination !== 'Both' && item.Caffeination !== formState.caffeination) return false;
         return true;
     });
-
-    const select = document.getElementById('item');
-    select.innerHTML = '<option value="">Choose...</option>' + 
-        filteredItems.map(item => `<option value="${item.Item}">${item.Item}</option>`).join('');
+    
+    const html = filteredItems
+        .map(item => `<button type="button" class="option-button item-option" onclick="selectOption('item', '${item.Item}', this)">${item.Item}</button>`)
+        .join('');
+    document.getElementById('itemGroup').innerHTML = html;
 }
 
-// Update milk options
-function updateMilkOptions() {
-    const item = document.getElementById('item').value;
-    const itemData = items.find(i => i.Item === item && i.Category === 'Beverage');
+function renderMilkButtons() {
+    const itemData = items.find(i => i.Item === formState.item && i.Category === 'Beverage');
+    if (!itemData) return;
     
-    if (!itemData) {
-        document.getElementById('milkOptions').innerHTML = '';
-        formState.milk = 'None';
-        return;
-    }
-
     const milkChoice = itemData['Milk Choice'];
     const milkItems = items.filter(i => i.Category === 'Milk' && i.Available === 'TRUE');
     
     let availableMilks = [];
-    if (milkChoice === 'None') {
-        availableMilks = [{ Item: 'No Milk' }];
-    } else if (milkChoice === 'Required') {
-        availableMilks = milkItems.filter(m => m.Type !== 'No Milk');
-    } else if (milkChoice === 'Optional') {
-        availableMilks = milkItems;
-    } else if (milkChoice === 'Half & Half') {
-        availableMilks = milkItems.filter(m => m.Type === 'Half & Half');
-    }
-
-    const html = availableMilks.map(milk => `
-        <div class="radio-option">
-            <label><input type="radio" name="milk" value="${milk.Item}" ${milkChoice === 'None' ? 'checked' : ''}> ${milk.Item}</label>
-        </div>
-    `).join('');
-
-    document.getElementById('milkOptions').innerHTML = html || '<p>No milk options available</p>';
-}
-
-// Render flavors options
-function renderFlavorsOptions() {
-    const flavors = items.filter(i => i.Category === 'Flavors & Add-ons' && i.Available === 'TRUE');
-    const html = flavors.map(flavor => `
-        <div class="checkbox-option">
-            <label><input type="checkbox" name="flavors" value="${flavor.Type}"> ${flavor.Type}</label>
-        </div>
-    `).join('');
+    if (milkChoice === 'None') availableMilks = [{ Item: 'No Milk' }];
+    else if (milkChoice === 'Required') availableMilks = milkItems.filter(m => m.Type !== 'No Milk');
+    else if (milkChoice === 'Optional') availableMilks = milkItems;
+    else if (milkChoice === 'Half & Half') availableMilks = milkItems.filter(m => m.Type === 'Half & Half');
     
-    document.getElementById('flavorsOptions').innerHTML = html;
+    const html = availableMilks
+        .map(milk => `<button type="button" class="option-button milk-option" onclick="selectOption('milk', '${milk.Item}', this)">${milk.Item}</button>`)
+        .join('');
+    document.getElementById('milkGroup').innerHTML = html || '<p>No options</p>';
 }
 
-// Render toppings options
-function renderToppingsOptions() {
-    const temperature = document.querySelector('input[name="temperature"]:checked')?.value;
+function renderFlavorsButtons() {
+    const flavors = items.filter(i => i.Category === 'Flavors & Add-ons' && i.Available === 'TRUE');
+    const html = flavors
+        .map(flavor => `<button type="button" class="option-button flavors-option" onclick="toggleOption('flavors', '${flavor.Type}', this)">${flavor.Type}</button>`)
+        .join('');
+    document.getElementById('flavorsGroup').innerHTML = html;
+}
+
+function renderToppingsButtons() {
+    const temperature = formState.temperature || document.querySelector('input[name="temperature"]:checked')?.value;
     const toppings = items.filter(i => {
         if (i.Category !== 'Toppings') return false;
         if (i.Available !== 'TRUE') return false;
         if (i.Temperature !== 'Both' && i.Temperature !== temperature) return false;
         return true;
     });
-
-    const html = toppings.map(topping => `
-        <div class="checkbox-option">
-            <label><input type="checkbox" name="toppings" value="${topping.Type}"> ${topping.Type}</label>
-        </div>
-    `).join('');
     
-    document.getElementById('toppingsOptions').innerHTML = html;
+    const html = toppings
+        .map(topping => `<button type="button" class="option-button toppings-option" onclick="toggleOption('toppings', '${topping.Type}', this)">${topping.Type}</button>`)
+        .join('');
+    document.getElementById('toppingsGroup').innerHTML = html;
 }
 
-// Render locations
-function renderLocations() {
-    const select = document.getElementById('location');
-    select.innerHTML = '<option value="">Select...</option>' + 
-        CONFIG.locations.map(loc => `<option value="${loc}">${loc}</option>`).join('');
-}
-
-// Toggle email field
 function toggleEmailField() {
     const emailField = document.getElementById('emailField');
-    const emailOptIn = document.getElementById('emailOptIn').checked;
-    
-    if (emailOptIn) {
+    if (document.getElementById('emailOptIn').checked) {
         emailField.classList.remove('hidden');
-        document.getElementById('email').focus();
     } else {
         emailField.classList.add('hidden');
         document.getElementById('email').value = '';
     }
 }
 
-// Render order summary
 function renderSummary() {
-    updateFormState();
-    
     let summary = `
         <div class="summary-item"><span class="summary-label">Temperature:</span> ${formState.temperature}</div>
         <div class="summary-item"><span class="summary-label">Caffeination:</span> ${formState.caffeination}</div>
+        <div class="summary-item"><span class="summary-label">Beverage:</span> ${formState.beverage}</div>
+        <div class="summary-item"><span class="summary-label">Style:</span> ${formState.style}</div>
         <div class="summary-item"><span class="summary-label">Item:</span> ${formState.item}</div>
     `;
-
-    if (formState.milk) {
-        summary += `<div class="summary-item"><span class="summary-label">Milk:</span> ${formState.milk}</div>`;
-    }
-
-    if (formState.flavors.length > 0) {
-        summary += `<div class="summary-item"><span class="summary-label">Flavors:</span> ${formState.flavors.join(', ')}</div>`;
-    }
-
-    if (formState.toppings.length > 0) {
-        summary += `<div class="summary-item"><span class="summary-label">Toppings:</span> ${formState.toppings.join(', ')}</div>`;
-    }
-
-    if (formState.specialInstructions) {
-        summary += `<div class="summary-item"><span class="summary-label">Instructions:</span> ${formState.specialInstructions}</div>`;
-    }
-
-    if (formState.name) {
-        summary += `<div class="summary-item"><span class="summary-label">Name:</span> ${formState.name}</div>`;
-    }
-
-    if (formState.pickupTime) {
-        summary += `<div class="summary-item"><span class="summary-label">Pick-up Time:</span> ${formState.pickupTime}</div>`;
-    }
-
-    if (CONFIG.showLocationField && formState.location) {
-        summary += `<div class="summary-item"><span class="summary-label">Location:</span> ${formState.location}</div>`;
-    }
-
+    
+    if (formState.milk) summary += `<div class="summary-item"><span class="summary-label">Milk:</span> ${formState.milk}</div>`;
+    if (formState.flavors.length > 0) summary += `<div class="summary-item"><span class="summary-label">Flavors:</span> ${formState.flavors.join(', ')}</div>`;
+    if (formState.toppings.length > 0) summary += `<div class="summary-item"><span class="summary-label">Toppings:</span> ${formState.toppings.join(', ')}</div>`;
+    if (formState.specialInstructions) summary += `<div class="summary-item"><span class="summary-label">Instructions:</span> ${formState.specialInstructions}</div>`;
+    if (formState.name) summary += `<div class="summary-item"><span class="summary-label">Name:</span> ${formState.name}</div>`;
+    if (formState.pickupTime) summary += `<div class="summary-item"><span class="summary-label">Pick-up Time:</span> ${formState.pickupTime}</div>`;
+    
     document.getElementById('orderSummary').innerHTML = summary;
 }
 
-// Submit form
 function submitForm(e) {
     e.preventDefault();
-    updateFormState();
-
+    
     const payload = {
         temperature: formState.temperature,
         caffeination: formState.caffeination,
         beverage: formState.beverage,
         style: formState.style,
         item: formState.item,
-        milk: formState.milk || 'None',
-        flavors: formState.flavors.length > 0 ? formState.flavors : ['None'],
-        toppings: formState.toppings.length > 0 ? formState.toppings : ['None'],
+        milk: formState.milk,
+        flavors: formState.flavors,
+        toppings: formState.toppings,
         specialInstructions: formState.specialInstructions,
         name: formState.name,
         pickupTime: formState.pickupTime,
-        location: formState.location || 'N/A',
         email: formState.email,
         emailOptIn: formState.emailOptIn,
         timestamp: new Date().toISOString()
@@ -550,20 +402,20 @@ function submitForm(e) {
         method: 'POST',
         body: JSON.stringify(payload)
     })
-    .then(response => response.json())
+    .then(r => r.json())
     .then(result => {
         if (result.success) {
             document.getElementById('beverageForm').style.display = 'none';
             document.getElementById('successMessage').style.display = 'block';
-            if (result.emailSent) {
-                document.getElementById('confirmationText').innerHTML = 'A confirmation email has been sent to ' + formState.email;
+            if (result.emailSent && formState.email) {
+                document.getElementById('confirmationText').innerHTML = 'Confirmation sent to ' + formState.email;
             }
         } else {
-            alert('Error submitting order. Please try again.');
+            alert('Error submitting order');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error submitting order. Please try again.');
+        alert('Error submitting order');
     });
 }
