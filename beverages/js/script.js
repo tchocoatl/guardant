@@ -268,7 +268,7 @@ function renderBeverageButtons() {
         return true;
     });
     
-    // Map Type to display names: Coffee, Tea, Other Beverage -> Other
+    // Custom order: Coffee, Tea, Other
     const beverageMap = {};
     beverageItems.forEach(item => {
         let displayName = item.Type;
@@ -276,8 +276,17 @@ function renderBeverageButtons() {
         beverageMap[displayName] = item.Type;
     });
     
-    const html = Object.keys(beverageMap)
-        .sort()
+    const customOrder = ['Coffee', 'Tea', 'Other'];
+    const sortedKeys = Object.keys(beverageMap).sort((a, b) => {
+        const aIndex = customOrder.indexOf(a);
+        const bIndex = customOrder.indexOf(b);
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+        return a.localeCompare(b);
+    });
+    
+    const html = sortedKeys
         .map(display => `<button type="button" class="option-button beverage-option" onclick="selectOption('beverage', '${beverageMap[display]}', this)">${display}</button>`)
         .join('');
     document.getElementById('beverageGroup').innerHTML = html;
@@ -296,8 +305,19 @@ function renderStyleButtons() {
             .map(item => item.Style)
     );
     
-    const html = Array.from(styles)
-        .sort()
+    // Custom order for Coffee styles: Espresso, Brewed Coffee
+    const customOrder = ['Espresso', 'Brewed Coffee', 'Tea Latte', 'Brewed Tea', 'Specialty'];
+    const stylesArray = Array.from(styles);
+    const sortedStyles = stylesArray.sort((a, b) => {
+        const aIndex = customOrder.indexOf(a);
+        const bIndex = customOrder.indexOf(b);
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+        return a.localeCompare(b);
+    });
+    
+    const html = sortedStyles
         .map(style => `<button type="button" class="option-button style-option" onclick="selectOption('style', '${style}', this)">${style}</button>`)
         .join('');
     document.getElementById('styleGroup').innerHTML = html;
@@ -362,12 +382,20 @@ function renderToppingsButtons() {
 }
 
 function renderTimeButtons() {
-    const times = [
-        { label: '2:00 PM', value: '14:00' },
-        { label: '3:00 PM', value: '15:00' },
-        { label: '4:00 PM', value: '16:00' },
-        { label: '5:00 PM', value: '17:00' }
-    ];
+    // Generate 15-minute increments from 2:00 PM to 5:00 PM
+    const times = [];
+    for (let hour = 14; hour < 17; hour++) {
+        for (let minutes = 0; minutes < 60; minutes += 15) {
+            const timeStr = `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            const hourDisplay = hour === 14 ? '2' : hour === 15 ? '3' : hour === 16 ? '4' : '5';
+            const periodDisplay = hour < 12 ? 'AM' : 'PM';
+            const minDisplay = minutes === 0 ? '00' : minutes;
+            const label = `${hourDisplay}:${minDisplay} PM`;
+            times.push({ label, value: timeStr });
+        }
+    }
+    // Add 5:00 PM
+    times.push({ label: '5:00 PM', value: '17:00' });
     
     const html = times
         .map(time => `<button type="button" class="option-button time-option" onclick="selectOption('time', '${time.value}', this)">${time.label}</button>`)
@@ -386,13 +414,12 @@ function toggleEmailField() {
 }
 
 function timeValueToLabel(value) {
-    const map = { 
-        '14:00': '2:00 PM', 
-        '15:00': '3:00 PM', 
-        '16:00': '4:00 PM', 
-        '17:00': '5:00 PM' 
-    };
-    return map[value] || value;
+    const [hours, minutes] = value.split(':');
+    const hour = parseInt(hours);
+    const min = parseInt(minutes);
+    const hourDisplay = hour === 14 ? '2' : hour === 15 ? '3' : hour === 16 ? '4' : hour === 17 ? '5' : hour;
+    const minDisplay = String(min).padStart(2, '0');
+    return `${hourDisplay}:${minDisplay} PM`;
 }
 
 function renderSummary() {
@@ -425,6 +452,10 @@ function submitForm(e) {
     }
     submissionInProgress = true;
     
+    // Show success message immediately
+    document.getElementById('beverageForm').style.display = 'none';
+    document.getElementById('successMessage').style.display = 'block';
+    
     const payload = {
         temperature: formState.temperature,
         caffeination: formState.caffeination,
@@ -448,26 +479,20 @@ function submitForm(e) {
     })
     .then(r => r.json())
     .then(result => {
-        submissionInProgress = false;
-        
-        if (result.success) {
-            document.getElementById('beverageForm').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'block';
-            if (result.emailSent && formState.email) {
-                document.getElementById('confirmationText').innerHTML = 'Confirmation email sent to ' + formState.email;
-            }
-            
-            // Redirect after 3 seconds
-            setTimeout(() => {
-                window.location.href = 'https://goldfishcoffee.com';
-            }, 3000);
-        } else {
-            alert('Error submitting order. Please try again.');
+        if (result.emailSent && formState.email) {
+            document.getElementById('confirmationText').innerHTML = 'Confirmation email sent to ' + formState.email;
         }
+        
+        // Redirect after 3 seconds
+        setTimeout(() => {
+            window.location.href = 'https://goldfishcoffee.com';
+        }, 3000);
     })
     .catch(error => {
         submissionInProgress = false;
         console.error('Error:', error);
+        document.getElementById('beverageForm').style.display = 'block';
+        document.getElementById('successMessage').style.display = 'none';
         alert('Error submitting order. Please try again.');
     });
 }
