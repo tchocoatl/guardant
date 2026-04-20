@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beverage Orders☕</title>
+    <title>🩸 Beverage Orders ☕</title>
     <script>window.GAS_DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbxYssTw0IB98dKsvGX3cPocBqDNujBVf8xp3MnLETkI9XbnuTYaryADq2sB-UkjOfcb/exec';</script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,13 +16,55 @@
         .form-step.active { display: block; }
         .form-step h2 { color: #8B4513; margin-bottom: 20px; font-size: 1.2em; }
         label { display: block; margin: 15px 0 5px 0; font-weight: bold; }
-        input[type="text"], input[type="email"], input[type="time"], select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; }
-        input[type="radio"], input[type="checkbox"] { margin-right: 10px; }
+        
+        /* Button grid styling */
+        .button-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
+        .option-button { 
+            flex: 1; min-width: 120px;
+            padding: 12px 15px; 
+            background: #f0f0f0; 
+            border: 2px solid #ddd; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 1em;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .option-button:hover { background: #e0e0e0; }
+        .option-button.selected { 
+            background: #8B4513; 
+            color: white; 
+            border-color: #8B4513; 
+        }
+        
+        /* Checkbox/radio buttons */
+        input[type="radio"], input[type="checkbox"] { display: none; }
+        
+        input[type="text"], input[type="email"], input[type="time"], textarea { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 5px 0 15px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 1em; 
+        }
+        
         .radio-group, .checkbox-group { margin: 15px 0; }
-        .radio-option, .checkbox-option { margin: 10px 0; }
-        button { padding: 10px 20px; margin-right: 10px; background: #8B4513; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+        .radio-option, .checkbox-option { margin: 10px 0; display: inline-block; }
+        
+        button { 
+            padding: 10px 20px; 
+            margin-right: 10px; 
+            background: #8B4513; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 1em; 
+        }
         button:hover { background: #6B3410; }
         button:disabled { background: #ccc; cursor: not-allowed; }
+        
         .hidden { display: none; }
         #orderSummary { background: #f9f9f9; padding: 15px; border-left: 3px solid #D2691E; margin: 20px 0; }
         .summary-item { margin: 10px 0; }
@@ -33,35 +75,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>Beverage Orders☕</h1>
+        <h1>🩸 Beverage Orders ☕</h1>
         <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
 
         <form id="beverageForm">
             <!-- Step 1: Temperature -->
             <div class="form-step active" id="temperatureSection">
                 <h2>Step 1: Temperature Selection</h2>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <label><input type="radio" name="temperature" value="Hot"> ☕ Hot</label>
-                    </div>
-                    <div class="radio-option">
-                        <label><input type="radio" name="temperature" value="Iced"> 🧊 Iced</label>
-                    </div>
-                </div>
+                <div class="button-group" id="temperatureGroup"></div>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
 
             <!-- Step 2: Caffeination -->
             <div class="form-step" id="caffeinationSection">
                 <h2>Step 2: Caffeination</h2>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <label><input type="radio" name="caffeination" value="Caffeinated"> Caffeinated</label>
-                    </div>
-                    <div class="radio-option">
-                        <label><input type="radio" name="caffeination" value="Decaffeinated"> Decaffeinated</label>
-                    </div>
-                </div>
+                <div class="button-group" id="caffeinationGroup"></div>
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
@@ -69,10 +97,7 @@
             <!-- Step 3: Beverage Type -->
             <div class="form-step" id="beverageSection">
                 <h2>Step 3: Beverage Type</h2>
-                <label for="beverageType">Select Beverage Type:</label>
-                <select id="beverageType" name="beverage" autocomplete="off">
-                    <option value="">Choose...</option>
-                </select>
+                <div class="button-group" id="beverageGroup"></div>
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
@@ -80,10 +105,7 @@
             <!-- Step 4: Style -->
             <div class="form-step" id="styleSection">
                 <h2>Step 4: Beverage Style</h2>
-                <label for="style">Select Style:</label>
-                <select id="style" name="style" autocomplete="off">
-                    <option value="">Choose...</option>
-                </select>
+                <div class="button-group" id="styleGroup"></div>
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
@@ -91,10 +113,7 @@
             <!-- Step 5: Item -->
             <div class="form-step" id="itemSection">
                 <h2>Step 5: Select Item</h2>
-                <label for="item">Select Item:</label>
-                <select id="item" name="item" autocomplete="off">
-                    <option value="">Choose...</option>
-                </select>
+                <div class="button-group" id="itemGroup"></div>
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
@@ -102,7 +121,7 @@
             <!-- Step 6: Milk -->
             <div class="form-step" id="milkSection">
                 <h2>Step 6: Milk Selection</h2>
-                <div id="milkOptions"></div>
+                <div class="button-group" id="milkGroup"></div>
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
@@ -110,7 +129,7 @@
             <!-- Step 7: Flavors -->
             <div class="form-step" id="flavorsSection">
                 <h2>Step 7: Flavors & Add-ons</h2>
-                <div id="flavorsOptions"></div>
+                <div class="button-group" id="flavorsGroup"></div>
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
@@ -118,7 +137,7 @@
             <!-- Step 8: Toppings -->
             <div class="form-step" id="toppingsSection">
                 <h2>Step 8: Toppings</h2>
-                <div id="toppingsOptions"></div>
+                <div class="button-group" id="toppingsGroup"></div>
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
@@ -131,11 +150,6 @@
                 
                 <label for="pickupTime">Pick-up Time:</label>
                 <input type="time" id="pickupTime" name="pickupTime" autocomplete="off">
-                
-                <label for="location">Location:</label>
-                <select id="location" name="location" autocomplete="off">
-                    <option value="">Select...</option>
-                </select>
                 
                 <label><input type="checkbox" id="emailOptIn" autocomplete="off" onchange="toggleEmailField()"> Opt-in for email confirmation</label>
                 <div id="emailField" class="hidden">
