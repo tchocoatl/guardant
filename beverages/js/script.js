@@ -111,19 +111,39 @@ function nextSection() {
         updateFormState();
         
         // Special handling for dynamic sections
-        if (currentSection === 2) {
+        if (currentSection === 0) {
+            // After temperature selection
+            updateProgress();
+            showSection(currentSection + 1);
+        } else if (currentSection === 1) {
+            // After caffeination selection - NOW populate beverage options
             renderBeverageOptions();
-        } else if (currentSection === 3) {
+            updateProgress();
+            showSection(currentSection + 1);
+        } else if (currentSection === 2) {
+            // After beverage selection
             updateStyles();
-        } else if (currentSection === 4) {
+            updateProgress();
+            showSection(currentSection + 1);
+        } else if (currentSection === 3) {
+            // After style selection
             updateItems();
-        } else if (currentSection === 5) {
+            updateProgress();
+            showSection(currentSection + 1);
+        } else if (currentSection === 4) {
+            // After item selection
             updateMilkOptions();
+            updateProgress();
+            showSection(currentSection + 1);
         } else if (currentSection === 8) {
+            // Before summary
             renderSummary();
+            updateProgress();
+            showSection(currentSection + 1);
+        } else {
+            updateProgress();
+            showSection(currentSection + 1);
         }
-        
-        showSection(currentSection + 1);
     }
 }
 
