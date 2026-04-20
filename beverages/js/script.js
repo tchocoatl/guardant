@@ -16,9 +16,9 @@ let formState = {
     milk: null,
     flavors: [],
     toppings: [],
+    pickupTime: null,
     specialInstructions: '',
     name: '',
-    pickupTime: '',
     location: '',
     email: '',
     emailOptIn: false
@@ -26,6 +26,8 @@ let formState = {
 
 let items = [];
 let currentSection = 0;
+let submissionInProgress = false;
+
 const sections = [
     'temperatureSection',
     'caffeinationSection',
@@ -35,6 +37,7 @@ const sections = [
     'milkSection',
     'flavorsSection',
     'toppingsSection',
+    'timeSection',
     'detailsSection',
     'summarySection'
 ];
@@ -104,7 +107,8 @@ function nextSection() {
     if (currentSection === 2) renderStyleButtons();
     if (currentSection === 3) renderItemButtons();
     if (currentSection === 4) renderMilkButtons();
-    if (currentSection === 8) renderSummary();
+    if (currentSection === 7) renderTimeButtons();
+    if (currentSection === 9) renderSummary();
     
     showSection(currentSection + 1);
 }
@@ -152,7 +156,7 @@ function validateSection(section) {
     }
     if (section === 6) {
         if (formState.flavors.length === 0) {
-            alert('Please select flavors or "No Flavors"');
+            alert('Please select flavors or "No Flavors or Add-ons"');
             return false;
         }
     }
@@ -163,23 +167,16 @@ function validateSection(section) {
         }
     }
     if (section === 8) {
-        const name = document.getElementById('name').value.trim();
-        const pickupTime = document.getElementById('pickupTime').value.trim();
-        
-        console.log('Validating details - name:', name, 'pickupTime:', pickupTime);
-        
-        if (!name) {
-            alert('Please enter your name');
-            return false;
-        }
-        if (!pickupTime) {
+        if (!formState.pickupTime) {
             alert('Please select a pick-up time');
             return false;
         }
+    }
+    if (section === 9) {
+        const name = document.getElementById('name').value.trim();
         
-        // Validate time is within range
-        if (pickupTime < CONFIG.pickupTimeMin || pickupTime > CONFIG.pickupTimeMax) {
-            alert(`Pick-up time must be between ${CONFIG.pickupTimeMin.replace(/^(\d{2}):/, (_, h) => parseInt(h) % 12 || 12) + ':' + CONFIG.pickupTimeMin.slice(-2)} and ${CONFIG.pickupTimeMax.replace(/^(\d{2}):/, (_, h) => parseInt(h) % 12 || 12) + ':' + CONFIG.pickupTimeMax.slice(-2)}`);
+        if (!name) {
+            alert('Please enter your name');
             return false;
         }
     }
@@ -188,7 +185,6 @@ function validateSection(section) {
 
 function updateFormState() {
     formState.name = document.getElementById('name').value.trim();
-    formState.pickupTime = document.getElementById('pickupTime').value.trim();
     formState.specialInstructions = document.getElementById('specialInstructions').value;
     formState.email = document.getElementById('email').value.trim();
     formState.emailOptIn = document.getElementById('emailOptIn').checked;
@@ -213,6 +209,7 @@ function selectOption(name, value, element) {
     if (name === 'style') formState.style = value;
     if (name === 'item') formState.item = value;
     if (name === 'milk') formState.milk = value;
+    if (name === 'time') formState.pickupTime = value;
 }
 
 function toggleOption(name, value, element) {
@@ -364,6 +361,20 @@ function renderToppingsButtons() {
     document.getElementById('toppingsGroup').innerHTML = html;
 }
 
+function renderTimeButtons() {
+    const times = [
+        { label: '2:00 PM', value: '14:00' },
+        { label: '3:00 PM', value: '15:00' },
+        { label: '4:00 PM', value: '16:00' },
+        { label: '5:00 PM', value: '17:00' }
+    ];
+    
+    const html = times
+        .map(time => `<button type="button" class="option-button time-option" onclick="selectOption('time', '${time.value}', this)">${time.label}</button>`)
+        .join('');
+    document.getElementById('timeGroup').innerHTML = html;
+}
+
 function toggleEmailField() {
     const emailField = document.getElementById('emailField');
     if (document.getElementById('emailOptIn').checked) {
@@ -372,6 +383,16 @@ function toggleEmailField() {
         emailField.classList.add('hidden');
         document.getElementById('email').value = '';
     }
+}
+
+function timeValueToLabel(value) {
+    const map = { 
+        '14:00': '2:00 PM', 
+        '15:00': '3:00 PM', 
+        '16:00': '4:00 PM', 
+        '17:00': '5:00 PM' 
+    };
+    return map[value] || value;
 }
 
 function renderSummary() {
@@ -386,9 +407,9 @@ function renderSummary() {
     if (formState.milk) summary += `<div class="summary-item"><span class="summary-label">Milk:</span> ${formState.milk}</div>`;
     if (formState.flavors.length > 0) summary += `<div class="summary-item"><span class="summary-label">Flavors:</span> ${formState.flavors.join(', ')}</div>`;
     if (formState.toppings.length > 0) summary += `<div class="summary-item"><span class="summary-label">Toppings:</span> ${formState.toppings.join(', ')}</div>`;
-    if (formState.specialInstructions) summary += `<div class="summary-item"><span class="summary-label">Instructions:</span> ${formState.specialInstructions}</div>`;
+    if (formState.pickupTime) summary += `<div class="summary-item"><span class="summary-label">Pick-up Time:</span> ${timeValueToLabel(formState.pickupTime)}</div>`;
     if (formState.name) summary += `<div class="summary-item"><span class="summary-label">Name:</span> ${formState.name}</div>`;
-    if (formState.pickupTime) summary += `<div class="summary-item"><span class="summary-label">Pick-up Time:</span> ${formState.pickupTime}</div>`;
+    if (formState.specialInstructions) summary += `<div class="summary-item"><span class="summary-label">Special Instructions:</span> ${formState.specialInstructions}</div>`;
     if (formState.emailOptIn && formState.email) summary += `<div class="summary-item"><span class="summary-label">Email:</span> ${formState.email}</div>`;
     
     document.getElementById('orderSummary').innerHTML = summary;
@@ -396,6 +417,13 @@ function renderSummary() {
 
 function submitForm(e) {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (submissionInProgress) {
+        alert('Order is being submitted. Please wait...');
+        return;
+    }
+    submissionInProgress = true;
     
     const payload = {
         temperature: formState.temperature,
@@ -406,9 +434,9 @@ function submitForm(e) {
         milk: formState.milk,
         flavors: formState.flavors,
         toppings: formState.toppings,
+        pickupTime: formState.pickupTime,
         specialInstructions: formState.specialInstructions,
         name: formState.name,
-        pickupTime: formState.pickupTime,
         email: formState.email,
         emailOptIn: formState.emailOptIn,
         timestamp: new Date().toISOString()
@@ -420,18 +448,26 @@ function submitForm(e) {
     })
     .then(r => r.json())
     .then(result => {
+        submissionInProgress = false;
+        
         if (result.success) {
             document.getElementById('beverageForm').style.display = 'none';
             document.getElementById('successMessage').style.display = 'block';
             if (result.emailSent && formState.email) {
-                document.getElementById('confirmationText').innerHTML = 'Confirmation sent to ' + formState.email;
+                document.getElementById('confirmationText').innerHTML = 'Confirmation email sent to ' + formState.email;
             }
+            
+            // Redirect after 3 seconds
+            setTimeout(() => {
+                window.location.href = 'https://goldfishcoffee.com';
+            }, 3000);
         } else {
-            alert('Error submitting order');
+            alert('Error submitting order. Please try again.');
         }
     })
     .catch(error => {
+        submissionInProgress = false;
         console.error('Error:', error);
-        alert('Error submitting order');
+        alert('Error submitting order. Please try again.');
     });
 }
