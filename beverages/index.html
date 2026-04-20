@@ -84,9 +84,27 @@
         #orderSummary { background: #f9f9f9; padding: 15px; border-left: 3px solid #D2691E; margin: 20px 0; }
         .summary-item { margin: 10px 0; font-size: 1.1em; }
         .summary-label { font-weight: bold; color: #8B4513; }
-        #successMessage { display: none; text-align: center; padding: 30px; background: #e8f5e9; border: 2px solid #4CAF50; border-radius: 8px; margin: 20px 0; }
-        #successMessage h2 { color: #2e7d32; margin-bottom: 15px; font-size: 1.8em; }
-        #successMessage p { font-size: 1.1em; margin: 10px 0; color: #333; }
+        
+        #successMessage { 
+            display: none; 
+            text-align: center; 
+            padding: 30px; 
+            background: #e8f5e9; 
+            border: 2px solid #4CAF50; 
+            border-radius: 8px; 
+            margin: 20px 0; 
+        }
+        #successMessage h2 { 
+            color: #2e7d32; 
+            margin-bottom: 15px; 
+            font-size: 1.8em; 
+        }
+        #successMessage p { 
+            font-size: 1.1em; 
+            margin: 10px 0; 
+            color: #333; 
+        }
+        
         small { display: block; margin-top: -10px; margin-bottom: 10px; color: #666; font-size: 0.9em; }
         
         .time-selects { display: flex; gap: 10px; margin: 20px 0; }
@@ -222,14 +240,14 @@
                 <button type="button" onclick="previousSection()">Back</button>
                 <button type="submit">Submit Order</button>
             </div>
-
-            <div id="successMessage">
-                <h2>✅ Order Submitted!</h2>
-                <p>Your beverage order has been placed successfully.</p>
-                <p id="confirmationText"></p>
-                <p style="margin-top: 20px; color: #666;">Redirecting to Goldfish Coffee...</p>
-            </div>
         </form>
+
+        <div id="successMessage">
+            <h2>✅ Order Submitted!</h2>
+            <p>Your beverage order has been placed successfully.</p>
+            <p id="confirmationText"></p>
+            <p style="margin-top: 20px; color: #666;">Redirecting to Goldfish Coffee...</p>
+        </div>
     </div>
 
     <script src="js/script.js"></script>
