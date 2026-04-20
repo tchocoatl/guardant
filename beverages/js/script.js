@@ -160,20 +160,47 @@ function previousSection() {
 // Validate current section
 function validateSection(section) {
     const form = document.getElementById('beverageForm');
-    const inputs = form.querySelectorAll(`#${sections[section]} input[required], #${sections[section]} select[required]`);
+    const sectionElement = document.getElementById(sections[section]);
     
-    for (let input of inputs) {
-        if (input.type === 'radio') {
-            const radioGroup = form.querySelector(`input[name="${input.name}"]:checked`);
-            if (!radioGroup) {
-                alert(`Please select a ${input.name}`);
-                return false;
-            }
-        } else if (!input.value) {
-            alert(`Please fill in all required fields`);
+    // Check for required radio groups
+    const radioGroups = {};
+    const radios = sectionElement.querySelectorAll('input[type="radio"]');
+    radios.forEach(radio => {
+        if (radio.hasAttribute('required') || radio.closest('.radio-group')) {
+            radioGroups[radio.name] = false;
+        }
+    });
+    
+    radios.forEach(radio => {
+        if (radio.checked) {
+            radioGroups[radio.name] = true;
+        }
+    });
+    
+    for (let group in radioGroups) {
+        if (!radioGroups[group]) {
+            alert(`Please select a ${group}`);
             return false;
         }
     }
+    
+    // Check for required select and text inputs
+    const selects = sectionElement.querySelectorAll('select[required]');
+    selects.forEach(select => {
+        if (!select.value) {
+            alert(`Please select a ${select.name || 'field'}`);
+            return false;
+        }
+    });
+    
+    const textInputs = sectionElement.querySelectorAll('input[type="text"][required], input[type="email"][required], input[type="time"][required]');
+    textInputs.forEach(input => {
+        if (!input.value) {
+            alert(`Please fill in ${input.name || 'field'}`);
+            return false;
+        }
+    });
+    
     return true;
 }
 
