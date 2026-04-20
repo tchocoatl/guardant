@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beverage Order☕</title>
+    <title>Beverage Orders☕</title>
     <script>window.GAS_DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbxYssTw0IB98dKsvGX3cPocBqDNujBVf8xp3MnLETkI9XbnuTYaryADq2sB-UkjOfcb/exec';</script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,7 +16,7 @@
         .form-step.active { display: block; }
         .form-step h2 { color: #8B4513; margin-bottom: 20px; font-size: 1.2em; }
         label { display: block; margin: 15px 0 5px 0; font-weight: bold; }
-        input[type="text"], input[type="email"], select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; }
+        input[type="text"], input[type="email"], input[type="time"], select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; }
         input[type="radio"], input[type="checkbox"] { margin-right: 10px; }
         .radio-group, .checkbox-group { margin: 15px 0; }
         .radio-option, .checkbox-option { margin: 10px 0; }
@@ -24,15 +24,16 @@
         button:hover { background: #6B3410; }
         button:disabled { background: #ccc; cursor: not-allowed; }
         .hidden { display: none; }
-        #summary { background: #f9f9f9; padding: 15px; border-left: 3px solid #D2691E; margin: 20px 0; }
+        #orderSummary { background: #f9f9f9; padding: 15px; border-left: 3px solid #D2691E; margin: 20px 0; }
         .summary-item { margin: 10px 0; }
         .summary-label { font-weight: bold; color: #8B4513; }
         #successMessage { display: none; text-align: center; color: green; }
+        small { display: block; margin-top: -10px; margin-bottom: 10px; color: #666; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Beverage Order☕</h1>
+        <h1>Beverage Orders☕</h1>
         <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
 
         <form id="beverageForm">
@@ -41,24 +42,24 @@
                 <h2>Step 1: Temperature Selection</h2>
                 <div class="radio-group">
                     <div class="radio-option">
-                        <label><input type="radio" name="temperature" value="Hot" required> ☕ Hot</label>
+                        <label><input type="radio" name="temperature" value="Hot"> ☕ Hot</label>
                     </div>
                     <div class="radio-option">
-                        <label><input type="radio" name="temperature" value="Iced" required> 🧊 Iced</label>
+                        <label><input type="radio" name="temperature" value="Iced"> 🧊 Iced</label>
                     </div>
                 </div>
                 <button type="button" onclick="nextSection()">Next</button>
             </div>
 
             <!-- Step 2: Caffeination -->
-            <div class="form-step hidden" id="caffeinationSection">
+            <div class="form-step" id="caffeinationSection">
                 <h2>Step 2: Caffeination</h2>
                 <div class="radio-group">
                     <div class="radio-option">
-                        <label><input type="radio" name="caffeination" value="Caffeinated" required> Caffeinated</label>
+                        <label><input type="radio" name="caffeination" value="Caffeinated"> Caffeinated</label>
                     </div>
                     <div class="radio-option">
-                        <label><input type="radio" name="caffeination" value="Decaffeinated" required> Decaffeinated</label>
+                        <label><input type="radio" name="caffeination" value="Decaffeinated"> Decaffeinated</label>
                     </div>
                 </div>
                 <button type="button" onclick="previousSection()">Back</button>
@@ -66,10 +67,10 @@
             </div>
 
             <!-- Step 3: Beverage Type -->
-            <div class="form-step hidden" id="beverageSection">
+            <div class="form-step" id="beverageSection">
                 <h2>Step 3: Beverage Type</h2>
                 <label for="beverageType">Select Beverage Type:</label>
-                <select id="beverageType" name="beverage" required onchange="updateStyles()">
+                <select id="beverageType" name="beverage" autocomplete="off">
                     <option value="">Choose...</option>
                 </select>
                 <button type="button" onclick="previousSection()">Back</button>
@@ -77,10 +78,10 @@
             </div>
 
             <!-- Step 4: Style -->
-            <div class="form-step hidden" id="styleSection">
+            <div class="form-step" id="styleSection">
                 <h2>Step 4: Beverage Style</h2>
                 <label for="style">Select Style:</label>
-                <select id="style" name="style" required onchange="updateItems()">
+                <select id="style" name="style" autocomplete="off">
                     <option value="">Choose...</option>
                 </select>
                 <button type="button" onclick="previousSection()">Back</button>
@@ -88,10 +89,10 @@
             </div>
 
             <!-- Step 5: Item -->
-            <div class="form-step hidden" id="itemSection">
+            <div class="form-step" id="itemSection">
                 <h2>Step 5: Select Item</h2>
                 <label for="item">Select Item:</label>
-                <select id="item" name="item" required onchange="updateMilkOptions()">
+                <select id="item" name="item" autocomplete="off">
                     <option value="">Choose...</option>
                 </select>
                 <button type="button" onclick="previousSection()">Back</button>
@@ -99,7 +100,7 @@
             </div>
 
             <!-- Step 6: Milk -->
-            <div class="form-step hidden" id="milkSection">
+            <div class="form-step" id="milkSection">
                 <h2>Step 6: Milk Selection</h2>
                 <div id="milkOptions"></div>
                 <button type="button" onclick="previousSection()">Back</button>
@@ -107,7 +108,7 @@
             </div>
 
             <!-- Step 7: Flavors -->
-            <div class="form-step hidden" id="flavorsSection">
+            <div class="form-step" id="flavorsSection">
                 <h2>Step 7: Flavors & Add-ons</h2>
                 <div id="flavorsOptions"></div>
                 <button type="button" onclick="previousSection()">Back</button>
@@ -115,7 +116,7 @@
             </div>
 
             <!-- Step 8: Toppings -->
-            <div class="form-step hidden" id="toppingsSection">
+            <div class="form-step" id="toppingsSection">
                 <h2>Step 8: Toppings</h2>
                 <div id="toppingsOptions"></div>
                 <button type="button" onclick="previousSection()">Back</button>
@@ -123,27 +124,27 @@
             </div>
 
             <!-- Step 9: Details -->
-            <div class="form-step hidden" id="detailsSection">
+            <div class="form-step" id="detailsSection">
                 <h2>Step 9: Order Details</h2>
                 <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" autocomplete="name">
                 
                 <label for="pickupTime">Pick-up Time:</label>
-                <input type="time" id="pickupTime" name="pickupTime" required>
+                <input type="time" id="pickupTime" name="pickupTime" autocomplete="off">
                 
                 <label for="location">Location:</label>
-                <select id="location" name="location" required>
+                <select id="location" name="location" autocomplete="off">
                     <option value="">Select...</option>
                 </select>
                 
-                <label><input type="checkbox" id="emailOptIn" onchange="toggleEmailField()"> Opt-in for email confirmation</label>
+                <label><input type="checkbox" id="emailOptIn" autocomplete="off" onchange="toggleEmailField()"> Opt-in for email confirmation</label>
                 <div id="emailField" class="hidden">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email">
+                    <input type="email" id="email" name="email" autocomplete="email">
                 </div>
                 
                 <label for="specialInstructions">Special Instructions:</label>
-                <textarea id="specialInstructions" name="specialInstructions" rows="4" maxlength="500"></textarea>
+                <textarea id="specialInstructions" name="specialInstructions" rows="4" maxlength="500" autocomplete="off"></textarea>
                 <small id="instructionsCount">0/500</small>
                 
                 <button type="button" onclick="previousSection()">Back</button>
@@ -151,7 +152,7 @@
             </div>
 
             <!-- Step 10: Summary -->
-            <div class="form-step hidden" id="summarySection">
+            <div class="form-step" id="summarySection">
                 <h2>Step 10: Order Summary</h2>
                 <div id="orderSummary"></div>
                 <button type="button" onclick="previousSection()">Back</button>
