@@ -3,79 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🩸 Beverage Orders ☕</title>
+    <title>Beverage Orders ☕</title>
     <script>window.GAS_DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbxYssTw0IB98dKsvGX3cPocBqDNujBVf8xp3MnLETkI9XbnuTYaryADq2sB-UkjOfcb/exec';</script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #8B4513; margin-bottom: 20px; }
+        h1 { text-align: center; color: #8B4513; margin-bottom: 20px; font-size: 2.5em; }
         .progress-bar { background: #ddd; height: 8px; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
         .progress { background: #8B4513; height: 100%; transition: width 0.3s; width: 0%; }
         .form-step { display: none; }
         .form-step.active { display: block; }
-        .form-step h2 { color: #8B4513; margin-bottom: 20px; font-size: 1.2em; }
+        .form-step h2 { color: #8B4513; margin-bottom: 20px; font-size: 1.5em; }
         label { display: block; margin: 15px 0 5px 0; font-weight: bold; }
         
         /* Button grid styling */
-        .button-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
+        .button-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
         .option-button { 
             flex: 1; min-width: 120px;
-            padding: 12px 15px; 
-            background: #f0f0f0; 
-            border: 2px solid #ddd; 
-            border-radius: 6px; 
+            padding: 20px 15px; 
+            background: #8B4513;
+            color: white;
+            border: 3px solid #8B4513; 
+            border-radius: 8px; 
             cursor: pointer; 
-            font-size: 1em;
+            font-size: 1.1em;
+            font-weight: bold;
             text-align: center;
             transition: all 0.2s;
         }
-        .option-button:hover { background: #e0e0e0; }
-        .option-button.selected { 
-            background: #8B4513; 
-            color: white; 
-            border-color: #8B4513; 
+        .option-button:hover { 
+            background: #A0522D;
+            border-color: #A0522D;
         }
-        
-        /* Checkbox/radio buttons */
-        input[type="radio"], input[type="checkbox"] { display: none; }
+        .option-button.selected { 
+            background: #D2691E;
+            border-color: #D2691E;
+            box-shadow: 0 0 10px rgba(210, 105, 30, 0.5);
+        }
         
         input[type="text"], input[type="email"], input[type="time"], textarea { 
             width: 100%; 
-            padding: 10px; 
-            margin: 5px 0 15px 0; 
-            border: 1px solid #ddd; 
+            padding: 12px; 
+            margin: 8px 0 15px 0; 
+            border: 2px solid #ddd; 
             border-radius: 4px; 
-            font-size: 1em; 
+            font-size: 1.1em; 
         }
         
-        .radio-group, .checkbox-group { margin: 15px 0; }
-        .radio-option, .checkbox-option { margin: 10px 0; display: inline-block; }
+        input[type="checkbox"] { 
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .checkbox-label { 
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            font-weight: bold;
+        }
         
         button { 
-            padding: 10px 20px; 
-            margin-right: 10px; 
+            padding: 12px 20px; 
+            margin-right: 10px;
+            margin-top: 20px;
             background: #8B4513; 
             color: white; 
             border: none; 
             border-radius: 4px; 
             cursor: pointer; 
-            font-size: 1em; 
+            font-size: 1em;
+            font-weight: bold;
         }
         button:hover { background: #6B3410; }
         button:disabled { background: #ccc; cursor: not-allowed; }
         
         .hidden { display: none; }
         #orderSummary { background: #f9f9f9; padding: 15px; border-left: 3px solid #D2691E; margin: 20px 0; }
-        .summary-item { margin: 10px 0; }
+        .summary-item { margin: 10px 0; font-size: 1.1em; }
         .summary-label { font-weight: bold; color: #8B4513; }
         #successMessage { display: none; text-align: center; color: green; }
-        small { display: block; margin-top: -10px; margin-bottom: 10px; color: #666; }
+        small { display: block; margin-top: -10px; margin-bottom: 10px; color: #666; font-size: 0.9em; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🩸 Beverage Orders ☕</h1>
+        <h1>Beverage Orders ☕</h1>
         <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
 
         <form id="beverageForm">
@@ -146,19 +161,22 @@
             <div class="form-step" id="detailsSection">
                 <h2>Step 9: Order Details</h2>
                 <label for="name">Name:</label>
-                <input type="text" id="name" name="name" autocomplete="name">
+                <input type="text" id="name" name="name" autocomplete="name" placeholder="Enter your name">
                 
-                <label for="pickupTime">Pick-up Time:</label>
-                <input type="time" id="pickupTime" name="pickupTime" autocomplete="off">
+                <label for="pickupTime">Pick-up Time (2:00 PM - 5:00 PM):</label>
+                <input type="time" id="pickupTime" name="pickupTime" autocomplete="off" min="14:00" max="17:00">
                 
-                <label><input type="checkbox" id="emailOptIn" autocomplete="off" onchange="toggleEmailField()"> Opt-in for email confirmation</label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="emailOptIn" autocomplete="off" onchange="toggleEmailField()">
+                    Email confirmation
+                </label>
                 <div id="emailField" class="hidden">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" autocomplete="email">
+                    <input type="email" id="email" name="email" autocomplete="email" placeholder="Enter your email">
                 </div>
                 
                 <label for="specialInstructions">Special Instructions:</label>
-                <textarea id="specialInstructions" name="specialInstructions" rows="4" maxlength="500" autocomplete="off"></textarea>
+                <textarea id="specialInstructions" name="specialInstructions" rows="4" maxlength="500" autocomplete="off" placeholder="Any special requests..."></textarea>
                 <small id="instructionsCount">0/500</small>
                 
                 <button type="button" onclick="previousSection()">Back</button>
