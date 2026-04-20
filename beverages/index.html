@@ -3,56 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../css/style.css">
-    <title>🩸Guardant Health Beverage Orders☕</title>
+    <title>🩸 Beverage Order Wizard ☕</title>
     <script>window.GAS_DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbxYssTw0IB98dKsvGX3cPocBqDNujBVf8xp3MnLETkI9XbnuTYaryADq2sB-UkjOfcb/exec';</script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #8B4513; margin-bottom: 20px; }
+        .progress-bar { background: #ddd; height: 8px; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress { background: #8B4513; height: 100%; transition: width 0.3s; width: 0%; }
+        .form-step { display: none; }
+        .form-step.active { display: block; }
+        .form-step h2 { color: #8B4513; margin-bottom: 20px; font-size: 1.2em; }
+        label { display: block; margin: 15px 0 5px 0; font-weight: bold; }
+        input[type="text"], input[type="email"], select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; }
+        input[type="radio"], input[type="checkbox"] { margin-right: 10px; }
+        .radio-group, .checkbox-group { margin: 15px 0; }
+        .radio-option, .checkbox-option { margin: 10px 0; }
+        button { padding: 10px 20px; margin-right: 10px; background: #8B4513; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+        button:hover { background: #6B3410; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .hidden { display: none; }
+        #summary { background: #f9f9f9; padding: 15px; border-left: 3px solid #D2691E; margin: 20px 0; }
+        .summary-item { margin: 10px 0; }
+        .summary-label { font-weight: bold; color: #8B4513; }
+        #successMessage { display: none; text-align: center; color: green; }
+    </style>
 </head>
 <body>
-    <h1>🩸Guardant Health Beverage Orders☕</h1>
-    <form id="beverageOrderForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required><br><br>
+    <div class="container">
+        <h1>🩸 Beverage Order Wizard ☕</h1>
+        <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
 
-        <label for="pickUpTime">Pickup Time:</label>
-        <input type="datetime-local" id="pickUpTime" name="pickUpTime" required><br><br>
+        <form id="beverageForm">
+            <!-- Step 1: Temperature -->
+            <div class="form-step active" id="temperatureSection">
+                <h2>Step 1: Temperature Selection</h2>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <label><input type="radio" name="temperature" value="Hot" required> ☕ Hot</label>
+                    </div>
+                    <div class="radio-option">
+                        <label><input type="radio" name="temperature" value="Iced" required> 🧊 Iced</label>
+                    </div>
+                </div>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-        <label for="location">Location:</label>
-        <input type="text" id="location" name="location" required><br><br>
+            <!-- Step 2: Caffeination -->
+            <div class="form-step hidden" id="caffeinationSection">
+                <h2>Step 2: Caffeination</h2>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <label><input type="radio" name="caffeination" value="Caffeinated" required> Caffeinated</label>
+                    </div>
+                    <div class="radio-option">
+                        <label><input type="radio" name="caffeination" value="Decaffeinated" required> Decaffeinated</label>
+                    </div>
+                </div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-        <label for="temperature">Temperature:</label>
-        <select id="temperature" name="temperature">
-            <option value="hot">Hot</option>
-            <option value="cold">Cold</option>
-        </select><br><br>
+            <!-- Step 3: Beverage Type -->
+            <div class="form-step hidden" id="beverageSection">
+                <h2>Step 3: Beverage Type</h2>
+                <label for="beverageType">Select Beverage Type:</label>
+                <select id="beverageType" name="beverage" required onchange="updateStyles()">
+                    <option value="">Choose...</option>
+                </select>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-        <label for="caffeination">Caffeination:</label>
-        <select id="caffeination" name="caffeination">
-            <option value="caffeinated">Caffeinated</option>
-            <option value="decaf">Decaf</option>
-        </select><br><br>
+            <!-- Step 4: Style -->
+            <div class="form-step hidden" id="styleSection">
+                <h2>Step 4: Beverage Style</h2>
+                <label for="style">Select Style:</label>
+                <select id="style" name="style" required onchange="updateItems()">
+                    <option value="">Choose...</option>
+                </select>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-        <label for="beverage">Beverage Selection:</label>
-        <select id="beverage" name="beverage">
-            <!-- Options for beverages will be dynamically populated -->
-        </select><br><br>
+            <!-- Step 5: Item -->
+            <div class="form-step hidden" id="itemSection">
+                <h2>Step 5: Select Item</h2>
+                <label for="item">Select Item:</label>
+                <select id="item" name="item" required onchange="updateMilkOptions()">
+                    <option value="">Choose...</option>
+                </select>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-        <label for="milk">Milk:</label>
-        <input type="text" id="milk" name="milk"><br><br>
+            <!-- Step 6: Milk -->
+            <div class="form-step hidden" id="milkSection">
+                <h2>Step 6: Milk Selection</h2>
+                <div id="milkOptions"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-        <label for="flavors">Flavors:</label>
-        <input type="text" id="flavors" name="flavors"><br><br>
+            <!-- Step 7: Flavors -->
+            <div class="form-step hidden" id="flavorsSection">
+                <h2>Step 7: Flavors & Add-ons</h2>
+                <div id="flavorsOptions"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-        <label for="toppings">Toppings:</label>
-        <input type="text" id="toppings" name="toppings"><br><br>
+            <!-- Step 8: Toppings -->
+            <div class="form-step hidden" id="toppingsSection">
+                <h2>Step 8: Toppings</h2>
+                <div id="toppingsOptions"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-        <label for="specialInstructions">Special Instructions:</label>
-        <textarea id="specialInstructions" name="specialInstructions"></textarea><br><br>
+            <!-- Step 9: Details -->
+            <div class="form-step hidden" id="detailsSection">
+                <h2>Step 9: Order Details</h2>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                
+                <label for="pickupTime">Pick-up Time:</label>
+                <input type="time" id="pickupTime" name="pickupTime" required>
+                
+                <label for="location">Location:</label>
+                <select id="location" name="location" required>
+                    <option value="">Select...</option>
+                </select>
+                
+                <label><input type="checkbox" id="emailOptIn" onchange="toggleEmailField()"> Opt-in for email confirmation</label>
+                <div id="emailField" class="hidden">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email">
+                </div>
+                
+                <label for="specialInstructions">Special Instructions:</label>
+                <textarea id="specialInstructions" name="specialInstructions" rows="4" maxlength="500"></textarea>
+                <small id="instructionsCount">0/500</small>
+                
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-        <label for="emailOptIn">Opt-in for confirmations:</label>
-        <input type="checkbox" id="emailOptIn" name="emailOptIn" value="guardant@goldfish.coffee"><br><br>
+            <!-- Step 10: Summary -->
+            <div class="form-step hidden" id="summarySection">
+                <h2>Step 10: Order Summary</h2>
+                <div id="orderSummary"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="submit">Submit Order</button>
+            </div>
 
-        <input type="submit" value="Submit Order">
-    </form>
-    <script src="../js/script.js"></script>
+            <div id="successMessage">
+                <h2>✅ Order Submitted!</h2>
+                <p>Your order has been placed successfully.</p>
+                <p id="confirmationText"></p>
+                <button type="button" onclick="location.reload()">Place Another Order</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
