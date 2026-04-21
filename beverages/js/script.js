@@ -479,6 +479,11 @@ function submitForm(e) {
     }
     submissionInProgress = true;
     
+    // Show success message IMMEDIATELY
+    document.getElementById('beverageForm').style.display = 'none';
+    document.getElementById('successMessage').style.display = 'block';
+    document.getElementById('confirmationText').innerHTML = 'Submitting your order...';
+    
     // Get pickup time from dropdowns for payload
     const hour = document.getElementById('pickupHour').value;
     const minute = document.getElementById('pickupMinute').value;
@@ -501,30 +506,17 @@ function submitForm(e) {
         timestamp: new Date().toISOString()
     };
 
-    console.log('Sending payload:', payload);
-    console.log('GAS URL:', window.GAS_DEPLOYMENT_URL);
-
-    // Show loading message
-    document.getElementById('beverageForm').style.display = 'none';
-    document.getElementById('successMessage').style.display = 'block';
-    document.getElementById('confirmationText').innerHTML = 'Submitting your order...';
-
     fetch(window.GAS_DEPLOYMENT_URL, {
         method: 'POST',
         body: JSON.stringify(payload)
     })
-    .then(r => {
-        console.log('Response status:', r.status);
-        return r.json();
-    })
+    .then(r => r.json())
     .then(result => {
-        console.log('Response result:', result);
-        
         // Update confirmation message with email status
         if (result.emailSent && formState.email) {
             document.getElementById('confirmationText').innerHTML = 'Confirmation email sent to ' + formState.email;
-        } else if (result.success) {
-            document.getElementById('confirmationText').innerHTML = 'Your order has been submitted!';
+        } else {
+            document.getElementById('confirmationText').innerHTML = '';
         }
         
         // Redirect after 3 seconds
@@ -534,9 +526,9 @@ function submitForm(e) {
     })
     .catch(error => {
         submissionInProgress = false;
-        console.error('Fetch error:', error);
+        console.error('Error:', error);
         document.getElementById('beverageForm').style.display = 'block';
         document.getElementById('successMessage').style.display = 'none';
-        alert('Error submitting order: ' + error.message);
+        alert('Error submitting order. Please try again.');
     });
 }
