@@ -1,4 +1,4 @@
-Category,Type,Style,Item,Temperature,Caffeination,Milk,Available
+Category,Type,Style,Item,Temperature,Caffeination,Milk Choice,Available
 Beverage,Coffee,Espresso,Espresso,Both,Both,None,TRUE
 Beverage,Coffee,Espresso,Latte,Both,Both,Required,TRUE
 Beverage,Coffee,Espresso,Mocha,Both,Both,Required,TRUE
@@ -8,7 +8,7 @@ Beverage,Coffee,Espresso,Americano,Both,Both,Required,TRUE
 Beverage,Coffee,Espresso,Flat White,Both,Both,Required,TRUE
 Beverage,Coffee,Espresso,Macchiato,Both,Both,Required,FALSE
 Beverage,Coffee,Espresso,Breve,Both,Both,Half & Half,TRUE
-Beverage,Coffee,Brewed Coffee,Cold Brew,Iced,Caffeinated,Optional,TRUE
+Beverage,Coffee,Brewed Coffee,Cold Brew,Iced,Both,Optional,TRUE
 Beverage,Coffee,Brewed Coffee,Drip Coffee,Both,Both,Optional,FALSE
 Beverage,Tea,Tea Latte,Masala Chai,Both,Caffeinated,Required,TRUE
 Beverage,Tea,Tea Latte,Matcha (unsweetened),Both,Caffeinated,Required,TRUE
@@ -21,48 +21,46 @@ Beverage,Tea,Brewed Tea,Irish Breakfast,Hot,Caffeinated,Optional,TRUE
 Beverage,Tea,Brewed Tea,Assam,Hot,Caffeinated,Optional,TRUE
 Beverage,Tea,Brewed Tea,Genmaicha,Hot,Caffeinated,None,TRUE
 Beverage,Tea,Brewed Tea,Jasmine Green,Hot,Caffeinated,None,TRUE
-Beverage,Tea,Brewed Tea,Lemon Verbena,Hot,Decaffeinated,None,TRUE
-Beverage,Tea,Brewed Tea,Spearmint,Hot,Decaffeinated,None,TRUE
-Beverage,Tea,Brewed Tea,Moroccan Mint,Hot,Decaffeinated,None,TRUE
+Beverage,Tea,Brewed Tea,Lemon Verbena,Hot,Decaffeinated,Optional,TRUE
+Beverage,Tea,Brewed Tea,Spearmint,Hot,Decaffeinated,Optional,TRUE
+Beverage,Tea,Brewed Tea,Moroccan Mint,Hot,Decaffeinated,Optional,TRUE
 Beverage,Tea,Brewed Tea,Peppermint,Hot,Decaffeinated,None,TRUE
 Beverage,Tea,Brewed Tea,Ginger,Hot,Decaffeinated,None,TRUE
 Beverage,Tea,Brewed Tea,Hibiscus,Hot,Decaffeinated,None,TRUE
 Beverage,Tea,Brewed Tea,Chamomile,Hot,Decaffeinated,None,TRUE
 Beverage,Tea,Brewed Tea,Rooibos Masala Chai,Hot,Decaffeinated,Optional,TRUE
-Beverage,Other Beverage,—,Hot Chocolate,Both,Decaffeinated,Required,TRUE
-Beverage,Other Beverage,—,Lemonade,Iced,Decaffeinated,None,FALSE
-Beverage,Other Beverage,—,Spiced Cider,Hot,Decaffeinated,None,TRUE
-Milk,Milk,—,—,—,—,—,TRUE
-Milk,Whole Milk,—,—,—,—,—,TRUE
-Milk,Oat Milk,—,—,—,—,—,TRUE
-Milk,Almond Milk,—,—,—,—,—,TRUE
-Milk,Half & Half,—,—,—,—,—,TRUE
-Milk,Vegan Whole Milk,—,—,—,—,—,TRUE
-Milk,No Milk,—,—,Both,—,—,TRUE
-Flavors & Add-ons,Dark Chocolate,—,—,—,—,—,TRUE
-Flavors & Add-ons,Vanilla Bean,—,—,—,—,—,TRUE
-Flavors & Add-ons,Salted Caramel,—,—,—,—,—,TRUE
-Flavors & Add-ons,Pistachio,—,—,—,—,—,TRUE
-Flavors & Add-ons,Hazelnut,—,—,—,—,—,TRUE
-Flavors & Add-ons,Lavender,—,—,—,—,—,TRUE
-Flavors & Add-ons,Peppermint,—,—,—,—,—,TRUE
-Flavors & Add-ons,Yuzu,—,—,—,—,—,TRUE
-Flavors & Add-ons,Strawberry,—,—,—,—,—,TRUE
-Flavors & Add-ons,Strawberry Puree,—,—,—,—,—,FALSE
-Flavors & Add-ons,Fresh Raspberry,—,—,—,—,—,FALSE
-Flavors & Add-ons,Fresh Strawberry,—,—,—,—,—,FALSE
-Flavors & Add-ons,,—,—,—,—,—,FALSE
-Flavors & Add-ons,Pumpkin Spice,—,—,—,—,—,TRUE
-Flavors & Add-ons,Gingerbread,—,—,—,—,—,FALSE
-Flavors & Add-ons,White Chocolate,—,—,—,—,—,TRUE
-Flavors & Add-ons,Add Espresso Shot,—,—,—,—,—,FALSE
-Flavors & Add-ons,No Flavors or Add-ons,—,—,Both,—,—,TRUE
-Toppings,Lavender Cold Foam,—,—,Iced,—,—,FALSE
-Toppings,Salted Ube Cold Foam,—,—,Iced,—,—,TRUE
-Toppings,Fresh Lemon Slice,—,—,Both,—,—,FALSE
-Toppings,Fresh Mint,—,—,Both,—,—,FALSE
-Toppings,Whipped Cream,—,—,Both,—,—,TRUE
-Toppings,Chocolate Whipped Cream,—,—,Both,—,—,FALSE
-Toppings,Marshmallows,—,—,Both,—,—,FALSE
-Toppings,Sprinkles,—,—,Both,—,—,FALSE
-Toppings,No Toppings,—,—,Both,—,—,TRUE
+Beverage,Other Beverage,Specialty,Hot Chocolate,Hot,Decaffeinated,Required,TRUE
+Beverage,Other Beverage,Specialty,Lemonade,Iced,Decaffeinated,None,FALSE
+Beverage,Other Beverage,Specialty,Spiced Cider,Hot,Decaffeinated,None,TRUE
+Milk,Whole Milk,Dairy,Whole Milk,Both,Both,N/A,TRUE
+Milk,Oat Milk,Plant-Based,Oat Milk,Both,Both,N/A,TRUE
+Milk,Almond Milk,Plant-Based,Almond Milk,Both,Both,N/A,TRUE
+Milk,Half & Half,Dairy,Half & Half,Both,Both,N/A,TRUE
+Milk,Vegan Whole Milk,Plant-Based,Vegan Whole Milk,Both,Both,N/A,TRUE
+Milk,No Milk,None,No Milk,Both,Both,N/A,TRUE
+Flavors & Add-ons,Dark Chocolate,Syrup,Dark Chocolate,Both,Both,N/A,TRUE
+Flavors & Add-ons,Vanilla Bean,Syrup,Vanilla Bean,Both,Both,N/A,TRUE
+Flavors & Add-ons,Salted Caramel,Syrup,Salted Caramel,Both,Both,N/A,TRUE
+Flavors & Add-ons,Pistachio,Syrup,Pistachio,Both,Both,N/A,TRUE
+Flavors & Add-ons,Hazelnut,Syrup,Hazelnut,Both,Both,N/A,TRUE
+Flavors & Add-ons,Lavender,Syrup,Lavender,Both,Both,N/A,TRUE
+Flavors & Add-ons,Peppermint,Syrup,Peppermint,Both,Both,N/A,TRUE
+Flavors & Add-ons,Yuzu,Syrup,Yuzu,Both,Both,N/A,TRUE
+Flavors & Add-ons,Strawberry,Syrup,Strawberry,Both,Both,N/A,TRUE
+Flavors & Add-ons,Strawberry Puree,Syrup,Strawberry Puree,Both,Both,N/A,FALSE
+Flavors & Add-ons,Fresh Raspberry,Fresh,Fresh Raspberry,Both,Both,N/A,FALSE
+Flavors & Add-ons,Fresh Strawberry,Fresh,Fresh Strawberry,Both,Both,N/A,FALSE
+Flavors & Add-ons,Pumpkin Spice,Syrup,Pumpkin Spice,Both,Both,N/A,FALSE
+Flavors & Add-ons,Gingerbread,Syrup,Gingerbread,Both,Both,N/A,FALSE
+Flavors & Add-ons,White Chocolate,Syrup,White Chocolate,Both,Both,N/A,TRUE
+Flavors & Add-ons,Add Espresso Shot,Extra,Add Espresso Shot,Both,Both,N/A,FALSE
+Flavors & Add-ons,No Flavors or Add-ons,None,No Flavors or Add-ons,Both,Both,N/A,TRUE
+Toppings,Lavender Cold Foam,Foam,Lavender Cold Foam,Iced,Both,N/A,FALSE
+Toppings,Salted Ube Cold Foam,Foam,Salted Ube Cold Foam,Iced,Both,N/A,TRUE
+Toppings,Fresh Lemon Slice,Fresh,Fresh Lemon Slice,Both,Both,N/A,FALSE
+Toppings,Fresh Mint Leaves,Fresh,Fresh Mint Leaves,Both,Both,N/A,FALSE
+Toppings,Whipped Cream,Cream,Whipped Cream,Both,Both,N/A,TRUE
+Toppings,Chocolate Whipped Cream,Cream,Chocolate Whipped Cream,Both,Both,N/A,FALSE
+Toppings,Marshmallows,Cream,Marshmallows,Both,Both,N/A,FALSE
+Toppings,Sprinkles,Cream,Sprinkles,Both,Both,N/A,FALSE
+Toppings,No Toppings,None,No Toppings,Both,Both,N/A,TRUE
