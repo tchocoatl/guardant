@@ -3,44 +3,155 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Beverage Orders</title>
+  <title>Beverage Orders☕</title>
 
   <style>
+    body { font-family: Arial, sans-serif; color: #222; margin: 0; padding: 0; }
+    .container { max-width: 720px; margin: 0 auto; padding: 20px; }
+    h1 { margin: 0 0 16px 0; }
+    .hint { color: #666; font-size: 12px; margin-top: 4px; }
+    .field { margin: 12px 0; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    input[type="text"], input[type="email"], select, textarea {
+      width: 100%;
+      max-width: 520px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .row > * { flex: 1 1 180px; }
     .time-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .time-row select { min-width: 110px; }
-    .time-hint { color: #666; font-size: 12px; margin-top: 4px; }
+    .time-row select { min-width: 140px; width: auto; }
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #8B4513;
+      color: #fff;
+    }
+    .btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+    .card {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+    }
   </style>
 
   <script>
     // IMPORTANT: set to your current GAS /exec URL
-    window.GAS_DEPLOYMENT_URL = window.GAS_DEPLOYMENT_URL || "https://script.google.com/macros/s/AKfycbwa-oR3rF4J30NzDwAwZmVasKibjgRrP35k_lw4pV4H_7pq1YixlYEJvofhAEwD-FMbPg/exec";
+    window.GAS_DEPLOYMENT_URL =
+      window.GAS_DEPLOYMENT_URL ||
+      "https://script.google.com/macros/s/AKfycbwa-oR3rF4J30NzDwAwZmVasKibjgRrP35k_lw4pV4H_7pq1YixlYEJvofhAEwD-FMbPg/exec";
   </script>
 </head>
+
 <body>
+  <div class="container">
+    <h1>Beverage Orders</h1>
 
-  <!-- Replace your old pickup time UI with this -->
-  <div>
-    <label for="pickupHour"><strong>Pick-up Time</strong></label>
-    <div class="time-row">
-      <select id="pickupHour" name="pickupHour" required>
-        <option value="">Hour</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select>
+    <!-- Add a non-form, focusable top element so the browser doesn't jump to the first select -->
+    <a id="top" href="#" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">top</a>
 
-      <select id="pickupMinute" name="pickupMinute" required>
-        <option value="">Minutes</option>
-        <!-- populated by script -->
-      </select>
+    <div class="card">
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" type="text" autocomplete="name" inputmode="text" />
+      </div>
 
-      <!-- This event: PM fixed. For future events, swap to an AM/PM dropdown. -->
-      <span><strong>PM</strong></span>
+      <div class="field">
+        <label for="email">Email (optional)</label>
+        <input id="email" type="email" autocomplete="email" inputmode="email" />
+        <div class="hint">If you opt in below, we’ll send a confirmation email.</div>
+      </div>
+
+      <div class="field">
+        <label>
+          <input id="emailOptIn" type="checkbox" />
+          Email me a confirmation
+        </label>
+      </div>
+
+      <div class="field">
+        <label><strong>Pick-up Time</strong></label>
+        <div class="time-row">
+          <select id="pickupHour" name="pickupHour" required>
+            <option value="">Hour</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+
+          <select id="pickupMinute" name="pickupMinute" required>
+            <option value="">Minutes</option>
+            <!-- populated by script -->
+          </select>
+
+          <span><strong>PM</strong></span>
+        </div>
+        <div class="hint">Times are between 2:00 PM and 4:59 PM for this event.</div>
+      </div>
+
+      <!-- Minimal beverage fields so payload is meaningful (adjust to your real UI later) -->
+      <div class="row">
+        <div class="field">
+          <label for="temperature">Temperature</label>
+          <select id="temperature">
+            <option value="">(select)</option>
+            <option value="Hot">Hot</option>
+            <option value="Iced">Iced</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="caffeination">Caffeination</label>
+          <select id="caffeination">
+            <option value="">(select)</option>
+            <option value="Caffeinated">Caffeinated</option>
+            <option value="Decaf">Decaf</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="beverage">Beverage</label>
+          <input id="beverage" type="text" placeholder="e.g., Latte" />
+        </div>
+
+        <div class="field">
+          <label for="milk">Milk</label>
+          <input id="milk" type="text" placeholder="e.g., Oat" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="style">Style</label>
+          <input id="style" type="text" placeholder="e.g., Vanilla" />
+        </div>
+
+        <div class="field">
+          <label for="item">Item</label>
+          <input id="item" type="text" placeholder="e.g., 12oz" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="specialInstructions">Special Instructions</label>
+        <textarea id="specialInstructions" placeholder="Anything we should know?"></textarea>
+      </div>
+
+      <button id="submitBtn" class="btn" type="button">Submit Order</button>
     </div>
-    <div class="time-hint">Times are between 2:00 PM and 4:59 PM for this event.</div>
   </div>
-
-  <button id="submitBtn" type="button">Submit Order</button>
 
   <script>
     // Populate minutes 00-59
@@ -49,11 +160,26 @@
       for (let i = 0; i < 60; i++) {
         const mm = String(i).padStart(2, "0");
         const opt = document.createElement("option");
-        opt.value = String(i);       // numeric minute as string
-        opt.textContent = mm;        // display 2-digit minute
+        opt.value = String(i);   // numeric minute as string
+        opt.textContent = mm;    // display 2-digit minute
         minSel.appendChild(opt);
       }
     })();
+
+    // Prevent the browser from auto-focusing the first form control (which can scroll to pickup time)
+    window.addEventListener("load", () => {
+      // force initial scroll to top
+      window.scrollTo(0, 0);
+
+      // remove any unexpected focus (e.g., restored session focus)
+      if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+      }
+
+      // focus a hidden "top" anchor to keep scroll position stable
+      const top = document.getElementById("top");
+      if (top) top.focus({ preventScroll: true });
+    });
 
     function getPickupTimeObject_() {
       const hourStr = document.getElementById("pickupHour").value;
@@ -66,60 +192,4 @@
 
       // Hours constrained to 2-4 for this event
       if (!Number.isFinite(hour) || hour < 2 || hour > 4) return null;
-      if (!Number.isFinite(minute) || minute < 0 || minute > 59) return null;
-
-      return { hour, minute, ampm: "PM" };
-    }
-
-    async function submitOrder_() {
-      if (!window.GAS_DEPLOYMENT_URL || window.GAS_DEPLOYMENT_URL.includes("/.../exec")) {
-        alert("GAS deployment URL is not configured.");
-        return;
-      }
-
-      const pickupTime = getPickupTimeObject_();
-      if (!pickupTime) {
-        alert("Please select a pick-up hour (2–4) and minutes (00–59).");
-        return;
-      }
-
-      // NOTE: Replace these field lookups with your real form element IDs.
-      const order = {
-        pickupTime, // canonical form consumed by Code.gs
-        name: (document.getElementById("name")?.value || "").trim(),
-        temperature: (document.getElementById("temperature")?.value || "").trim(),
-        caffeination: (document.getElementById("caffeination")?.value || "").trim(),
-        beverage: (document.getElementById("beverage")?.value || "").trim(),
-        style: (document.getElementById("style")?.value || "").trim(),
-        item: (document.getElementById("item")?.value || "").trim(),
-        milk: (document.getElementById("milk")?.value || "").trim(),
-        flavors: [],   // TODO: map from your UI
-        toppings: [],  // TODO: map from your UI
-        specialInstructions: (document.getElementById("specialInstructions")?.value || "").trim(),
-        emailOptIn: Boolean(document.getElementById("emailOptIn")?.checked),
-        email: (document.getElementById("email")?.value || "").trim()
-      };
-
-      const res = await fetch(window.GAS_DEPLOYMENT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(order)
-      });
-
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || `Request failed (HTTP ${res.status})`);
-      }
-
-      alert("Order submitted successfully.");
-    }
-
-    document.getElementById("submitBtn").addEventListener("click", () => {
-      submitOrder_().catch(err => {
-        console.error(err);
-        alert(err.message || String(err));
-      });
-    });
-  </script>
-</body>
-</html>
+      if (!Number.isFinite(minute) || minute*
