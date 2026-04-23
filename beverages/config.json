@@ -46,7 +46,7 @@
       "endTime": "17:00"
     },
     "location": {
-      "enabled": true,
+      "enabled": false,
       "required": false,
       "options": ["Main Office", "Conference Room A", "Break Room"]
     },
@@ -61,6 +61,6 @@
     "replyToEmail": "orders@goldfishcoffee.com"
   },
   "googleSheets": {
-    "spreadsheetId": "1l0uPX5_tbN-28IH3vsJsnxQDI9q4FbVUZGk66r06XnY"
+    "spreadsheetId": "1jAWmCCQp8XX5DM9eAtOminSZ5W_4lxxGMy5nwLD356U"
   }
 }
