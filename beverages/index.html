@@ -1,195 +1,255 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Beverage Orders☕</title>
-
-  <style>
-    body { font-family: Arial, sans-serif; color: #222; margin: 0; padding: 0; }
-    .container { max-width: 720px; margin: 0 auto; padding: 20px; }
-    h1 { margin: 0 0 16px 0; }
-    .hint { color: #666; font-size: 12px; margin-top: 4px; }
-    .field { margin: 12px 0; }
-    label { display: block; font-weight: 600; margin-bottom: 6px; }
-    input[type="text"], input[type="email"], select, textarea {
-      width: 100%;
-      max-width: 520px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-    }
-    textarea { min-height: 90px; resize: vertical; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    .row > * { flex: 1 1 180px; }
-    .time-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .time-row select { min-width: 140px; width: auto; }
-    .btn {
-      appearance: none;
-      border: 0;
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-weight: 700;
-      cursor: pointer;
-      background: #8B4513;
-      color: #fff;
-    }
-    .btn[disabled] { opacity: 0.6; cursor: not-allowed; }
-    .card {
-      background: #fafafa;
-      border: 1px solid #eee;
-      border-radius: 10px;
-      padding: 16px;
-      margin-top: 16px;
-    }
-  </style>
-
-  <script>
-    // IMPORTANT: set to your current GAS /exec URL
-    window.GAS_DEPLOYMENT_URL =
-      window.GAS_DEPLOYMENT_URL ||
-      "https://script.google.com/macros/s/AKfycbwa-oR3rF4J30NzDwAwZmVasKibjgRrP35k_lw4pV4H_7pq1YixlYEJvofhAEwD-FMbPg/exec";
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beverage Orders ☕</title>
+    <script>window.GAS_DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbxKjYEyYTOplu4_jRqylkiDI8hfCeEJrPwAPclS905pLaBnUmx2Jo1ykFsLPfYR70ex3w/exec';</script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #8B4513; margin-bottom: 20px; font-size: 2.5em; }
+        .progress-bar { background: #ddd; height: 8px; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress { background: #8B4513; height: 100%; transition: width 0.3s; width: 0%; }
+        .form-step { display: none; }
+        .form-step.active { display: block; }
+        .form-step h2 { color: #8B4513; margin-bottom: 20px; font-size: 1.5em; }
+        label { display: block; margin: 15px 0 5px 0; font-weight: bold; }
+        
+        /* Button grid styling */
+        .button-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+        .option-button { 
+            flex: 1; min-width: 120px;
+            padding: 20px 15px; 
+            background: #8B4513;
+            color: white;
+            border: 3px solid #8B4513; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .option-button:hover { 
+            background: #A0522D;
+            border-color: #A0522D;
+        }
+        .option-button.selected { 
+            background: #D2691E;
+            border-color: #D2691E;
+            box-shadow: 0 0 10px rgba(210, 105, 30, 0.5);
+        }
+        
+        input[type="text"], input[type="email"], textarea, select { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0 15px 0; 
+            border: 2px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 1.1em; 
+        }
+        
+        input[type="checkbox"] { 
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .checkbox-label { 
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        button { 
+            padding: 12px 20px; 
+            margin-right: 10px;
+            margin-top: 20px;
+            background: #8B4513; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 1em;
+            font-weight: bold;
+        }
+        button:hover { background: #6B3410; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .hidden { display: none; }
+        #orderSummary { background: #f9f9f9; padding: 15px; border-left: 3px solid #D2691E; margin: 20px 0; }
+        .summary-item { margin: 10px 0; font-size: 1.1em; }
+        .summary-label { font-weight: bold; color: #8B4513; }
+        
+        #successMessage { 
+            display: none; 
+            text-align: center; 
+            padding: 30px; 
+            background: #e8f5e9; 
+            border: 2px solid #4CAF50; 
+            border-radius: 8px; 
+            margin: 20px 0; 
+        }
+        #successMessage h2 { 
+            color: #2e7d32; 
+            margin-bottom: 15px; 
+            font-size: 1.8em; 
+        }
+        #successMessage p { 
+            font-size: 1.1em; 
+            margin: 10px 0; 
+            color: #333; 
+        }
+        
+        small { display: block; margin-top: -10px; margin-bottom: 10px; color: #666; font-size: 0.9em; }
+        
+        .time-selects { display: flex; gap: 10px; margin: 20px 0; }
+        .time-select { flex: 1; }
+        .time-select label { margin: 0 0 5px 0; }
+    </style>
 </head>
-
 <body>
-  <div class="container">
-    <h1>Beverage Orders</h1>
+    <div class="container">
+        <h1>Beverage Orders ☕</h1>
+        <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
 
-    <!-- Add a non-form, focusable top element so the browser doesn't jump to the first select -->
-    <a id="top" href="#" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">top</a>
+        <form id="beverageForm">
+            <!-- Step 1: Temperature -->
+            <div class="form-step active" id="temperatureSection">
+                <h2>Step 1: Temperature Selection</h2>
+                <div class="button-group" id="temperatureGroup"></div>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-    <div class="card">
-      <div class="field">
-        <label for="name">Name</label>
-        <input id="name" type="text" autocomplete="name" inputmode="text" />
-      </div>
+            <!-- Step 2: Caffeination -->
+            <div class="form-step" id="caffeinationSection">
+                <h2>Step 2: Caffeination</h2>
+                <div class="button-group" id="caffeinationGroup"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-      <div class="field">
-        <label for="email">Email (optional)</label>
-        <input id="email" type="email" autocomplete="email" inputmode="email" />
-        <div class="hint">If you opt in below, we’ll send a confirmation email.</div>
-      </div>
+            <!-- Step 3: Beverage Type -->
+            <div class="form-step" id="beverageSection">
+                <h2>Step 3: Beverage Type</h2>
+                <div class="button-group" id="beverageGroup"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-      <div class="field">
-        <label>
-          <input id="emailOptIn" type="checkbox" />
-          Email me a confirmation
-        </label>
-      </div>
+            <!-- Step 4: Style -->
+            <div class="form-step" id="styleSection">
+                <h2>Step 4: Beverage Style</h2>
+                <div class="button-group" id="styleGroup"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-      <div class="field">
-        <label><strong>Pick-up Time</strong></label>
-        <div class="time-row">
-          <select id="pickupHour" name="pickupHour" required>
-            <option value="">Hour</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-          </select>
+            <!-- Step 5: Item -->
+            <div class="form-step" id="itemSection">
+                <h2>Step 5: Select Item</h2>
+                <div class="button-group" id="itemGroup"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-          <select id="pickupMinute" name="pickupMinute" required>
-            <option value="">Minutes</option>
-            <!-- populated by script -->
-          </select>
+            <!-- Step 6: Milk -->
+            <div class="form-step" id="milkSection">
+                <h2>Step 6: Milk Selection</h2>
+                <div class="button-group" id="milkGroup"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
 
-          <span><strong>PM</strong></span>
+            <!-- Step 7: Flavors -->
+            <div class="form-step" id="flavorsSection">
+                <h2>Step 7: Flavors & Add-ons</h2>
+                <div class="button-group" id="flavorsGroup"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
+
+            <!-- Step 8: Toppings -->
+            <div class="form-step" id="toppingsSection">
+                <h2>Step 8: Toppings</h2>
+                <div class="button-group" id="toppingsGroup"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
+
+            <!-- Step 9: Pick-up Time -->
+            <div class="form-step" id="timeSection">
+                <h2>Step 9: Pick-up Time</h2>
+                <div class="time-selects">
+                    <div class="time-select">
+                        <label for="pickupHour">Hour:</label>
+                        <select id="pickupHour">
+                            <option value="">Select hour...</option>
+                            <option value="14">2:00 PM</option>
+                            <option value="15">3:00 PM</option>
+                            <option value="16">4:00 PM</option>
+                            <option value="17">5:00 PM</option>
+                        </select>
+                    </div>
+                    <div class="time-select">
+                        <label for="pickupMinute">Minutes:</label>
+                        <select id="pickupMinute">
+                            <option value="">Select minutes...</option>
+                            <option value="00">00</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="45">45</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
+
+            <!-- Step 10: Details -->
+            <div class="form-step" id="detailsSection">
+                <h2>Step 10: Order Details</h2>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" autocomplete="name" placeholder="Enter your name">
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" id="emailOptIn" autocomplete="off" onchange="toggleEmailField()">
+                    Email confirmation
+                </label>
+                <div id="emailField" class="hidden">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" autocomplete="email" placeholder="Enter your email">
+                </div>
+                
+                <label for="specialInstructions">Special Instructions:</label>
+                <textarea id="specialInstructions" name="specialInstructions" rows="4" maxlength="500" autocomplete="off" placeholder="Any special requests..."></textarea>
+                <small id="instructionsCount">0/500</small>
+                
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="button" onclick="nextSection()">Next</button>
+            </div>
+
+            <!-- Step 11: Summary -->
+            <div class="form-step" id="summarySection">
+                <h2>Step 11: Order Summary</h2>
+                <div id="orderSummary"></div>
+                <button type="button" onclick="previousSection()">Back</button>
+                <button type="submit">Submit Order</button>
+            </div>
+        </form>
+
+        <div id="successMessage">
+            <h2>✅ Order Submitted!</h2>
+            <p>Your beverage order has been placed successfully.</p>
+            <p id="confirmationText"></p>
+            <p style="margin-top: 20px; color: #666;">Redirecting to Goldfish Coffee...</p>
         </div>
-        <div class="hint">Times are between 2:00 PM and 4:59 PM for this event.</div>
-      </div>
-
-      <!-- Minimal beverage fields so payload is meaningful (adjust to your real UI later) -->
-      <div class="row">
-        <div class="field">
-          <label for="temperature">Temperature</label>
-          <select id="temperature">
-            <option value="">(select)</option>
-            <option value="Hot">Hot</option>
-            <option value="Iced">Iced</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="caffeination">Caffeination</label>
-          <select id="caffeination">
-            <option value="">(select)</option>
-            <option value="Caffeinated">Caffeinated</option>
-            <option value="Decaf">Decaf</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="beverage">Beverage</label>
-          <input id="beverage" type="text" placeholder="e.g., Latte" />
-        </div>
-
-        <div class="field">
-          <label for="milk">Milk</label>
-          <input id="milk" type="text" placeholder="e.g., Oat" />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="style">Style</label>
-          <input id="style" type="text" placeholder="e.g., Vanilla" />
-        </div>
-
-        <div class="field">
-          <label for="item">Item</label>
-          <input id="item" type="text" placeholder="e.g., 12oz" />
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="specialInstructions">Special Instructions</label>
-        <textarea id="specialInstructions" placeholder="Anything we should know?"></textarea>
-      </div>
-
-      <button id="submitBtn" class="btn" type="button">Submit Order</button>
     </div>
-  </div>
 
-  <script>
-    // Populate minutes 00-59
-    (function initMinutes() {
-      const minSel = document.getElementById("pickupMinute");
-      for (let i = 0; i < 60; i++) {
-        const mm = String(i).padStart(2, "0");
-        const opt = document.createElement("option");
-        opt.value = String(i);   // numeric minute as string
-        opt.textContent = mm;    // display 2-digit minute
-        minSel.appendChild(opt);
-      }
-    })();
-
-    // Prevent the browser from auto-focusing the first form control (which can scroll to pickup time)
-    window.addEventListener("load", () => {
-      // force initial scroll to top
-      window.scrollTo(0, 0);
-
-      // remove any unexpected focus (e.g., restored session focus)
-      if (document.activeElement && document.activeElement !== document.body) {
-        document.activeElement.blur();
-      }
-
-      // focus a hidden "top" anchor to keep scroll position stable
-      const top = document.getElementById("top");
-      if (top) top.focus({ preventScroll: true });
-    });
-
-    function getPickupTimeObject_() {
-      const hourStr = document.getElementById("pickupHour").value;
-      const minuteStr = document.getElementById("pickupMinute").value;
-
-      if (!hourStr || minuteStr === "") return null;
-
-      const hour = Number(hourStr);
-      const minute = Number(minuteStr);
-
-      // Hours constrained to 2-4 for this event
-      if (!Number.isFinite(hour) || hour < 2 || hour > 4) return null;
-      if (!Number.isFinite(minute) || minute*
+    <script src="js/script.js"></script>
+</body>
+</html>
